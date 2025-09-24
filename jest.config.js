@@ -1,6 +1,5 @@
 module.exports = {
-  setupFilesAfterEnv: ['./lib/models/index.js', './jest.setup.js'],
+  preset: 'ts-jest',
   testEnvironment: 'node',
-  testPathIgnorePatterns: ['./node_modules', './dist'],
-  modulePathIgnorePatterns: ['./docker'],
+  testMatch: ['**/test/**/*.test.ts'], // Only test files inside `tests/` folder
 };
