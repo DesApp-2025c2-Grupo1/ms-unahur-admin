@@ -1,6 +1,6 @@
 import { AffiliateSituation } from "../../domain/entities/AffiliateSituation";
 import { AffiliateSituationRepository } from "../../domain/interfaces/AffiliateSituationRepository";
-import { affiliateSituations } from "../database/affiliateSituation";
+import { affiliateSituations } from "../database/mock/affiliateSituation";
 
 export class InMemoryAffiliateSituationRepository implements AffiliateSituationRepository {
 

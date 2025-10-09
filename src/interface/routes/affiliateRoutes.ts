@@ -7,6 +7,7 @@ const affiliateController = new AffiliateController()
 
 router.get('/', affiliateController.getAll.bind(affiliateController)); //me aseguro que apunte a mi controlador
 
-router.get('/:credencial', affiliateController.byCredential.bind(affiliateController))
+//find generico par obtener afiliados
+router.get('/find', affiliateController.byField.bind(affiliateController))
 
 export { router as affiliateRoutes };
