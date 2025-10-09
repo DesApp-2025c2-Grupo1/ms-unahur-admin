@@ -1,9 +1,9 @@
 import { AffiliatesRepository } from "../../domain/interfaces/AffiliatesRepository";
 
-export class GetAllAffiliates {
+export class GetAffiliateByField {
     constructor(private affiliateRepository: AffiliatesRepository) { }
 
-    async execute() {
-        return await this.affiliateRepository.findAll();
+    async execute(field: string, value: any) {
+        return await this.affiliateRepository.findByField(field, value);
     }
 }

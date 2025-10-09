@@ -1,4 +1,4 @@
-import { AffiliateSituation } from "../../domain/entities/AffiliateSituation";
+import { AffiliateSituation } from "../../../domain/entities/AffiliateSituation";
 
 export const affiliateSituations: AffiliateSituation[] = [
     {

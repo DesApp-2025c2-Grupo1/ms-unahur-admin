@@ -1,11 +1,13 @@
 import { GetAllAffiliates } from "../../use-cases/affiliates/GetAllAffiliatesUseCase";
-import { GetByCredential } from "../../use-cases/affiliates/GetByCredentialUseCase";
+import { GetAffiliateByField } from "../../use-cases/affiliates/GetAffiliateByFieldUseCase";
+import { AffiliateRepository } from "../repositories/AffiliateRepository";
 import { InMemoryAffiliateRepository } from "../repositories/InMemoryAffiliateRepository";
+
 
 class AffiliateContainer {
 
-    //repositorio en memoria
-    private static _affiliateRepository = new InMemoryAffiliateRepository();
+    //modificar dependiendo de que quiera usar
+    private static _affiliateRepository = new AffiliateRepository; //clase concreta
 
     static getAffiliateRepository() {
         return this._affiliateRepository;
@@ -15,8 +17,8 @@ class AffiliateContainer {
         return new GetAllAffiliates(this._affiliateRepository);
     }
 
-    static getByCredentialUseCase() {
-        return new GetByCredential(this._affiliateRepository);
+    static getAffiliateByFieldUseCase() {
+        return new GetAffiliateByField(this._affiliateRepository);
     }
 }
 
