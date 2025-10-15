@@ -1,10 +1,11 @@
 import express from 'express';
+import cors from 'cors';
 import { affiliateRoutes } from './interface/routes/affiliateRoutes';
 import { affiliateSituationRouter } from './interface/routes/affiliateSituationRouter';
 import { AppDataSource } from './infrastructure/database/data-source';
 
-
 const app = express();
+app.use(cors())
 
 app.use(express.json());
 
@@ -21,9 +22,5 @@ AppDataSource.initialize()
   .catch((error) => {
     console.error('Error connecting to database:', error);
   });
-
-app.listen(PORT, () => {
-  console.log(`Server is running`);
-});
 
 export default app;
