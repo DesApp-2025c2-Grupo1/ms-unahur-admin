@@ -1,42 +1,22 @@
 {
-  "name": "administration-backend",
+  "name": "fix",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node-dev src/index.ts",
-    "start": "node ./build/index.js",
-    "tsc": "tsc",
-    "build": "tsc",
-    "typeorm": "typeorm-ts-node-commonjs -d src/infrastructure/database/data-source.ts",
-    "migration:generate": "npm run typeorm -- migration:generate",
-    "migration:run": "npm run typeorm -- migration:run",
-    "migration:revert": "npm run typeorm -- migration:revert"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/DesApp-2025c2-Grupo1/Administration-BackEnd.git"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon ./src/index.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/DesApp-2025c2-Grupo1/Administration-BackEnd/issues"
-  },
-  "homepage": "https://github.com/DesApp-2025c2-Grupo1/Administration-BackEnd#readme",
   "description": "",
   "devDependencies": {
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.3",
-    "@types/node": "^24.5.2",
-    "ts-node-dev": "^2.0.0",
-    "typescript": "^5.9.2"
+    "nodemon": "^3.1.10",
+    "prisma": "^6.17.1"
   },
   "dependencies": {
+    "@prisma/client": "^6.17.1",
     "cors": "^2.8.5",
-    "dotenv": "^17.2.3",
-    "express": "^5.1.0",
-    "pg": "^8.16.3",
-    "reflect-metadata": "^0.2.2",
-    "typeorm": "^0.3.27"
+    "express": "^5.1.0"
   }
 }

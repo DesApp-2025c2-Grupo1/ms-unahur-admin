@@ -1,9 +1,0 @@
-import { AffiliatesRepository } from "../../domain/interfaces/AffiliatesRepository";
-
-export class GetAllAffiliates {
-    constructor(private affiliateRepository: AffiliatesRepository) { }
-
-    async execute() {
-        return await this.affiliateRepository.findAll();
-    }
-}

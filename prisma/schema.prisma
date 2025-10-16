@@ -1,0 +1,76 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["views"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Plan {
+  id           Int           @id @default(autoincrement())
+  name         String
+  familyGroups FamilyGroup[]
+}
+
+model FamilyGroup {
+  id               Int         @id @default(autoincrement())
+  baseAffiliateNum String
+  planId           Int
+  createdAt        DateTime
+  affiliates       Affiliate[]
+  plan             Plan        @relation(fields: [planId], references: [id])
+}
+
+model Affiliate {
+  dni           String               @id
+  familyGroupId Int
+  memberNumber  Int
+  credential    String
+  documentType  String
+  firstName     String
+  lastName      String
+  birthDate     DateTime
+  relationship  String
+  validFrom     DateTime
+  validUntil    DateTime?
+  familyGroup   FamilyGroup          @relation(fields: [familyGroupId], references: [id])
+  situations    AffiliateSituation[]
+}
+
+model TherapeuticSituation {
+  id                  Int                  @id @default(autoincrement())
+  name                String
+  affiliateSituations AffiliateSituation[]
+}
+
+model AffiliateSituation {
+  id          Int                  @id @default(autoincrement())
+  situationId Int
+  dni         String
+  startDate   DateTime
+  endDate     DateTime?
+  observation String?
+  affiliate   Affiliate            @relation(fields: [dni], references: [dni])
+  situation   TherapeuticSituation @relation(fields: [situationId], references: [id])
+}
+
+view affilitesgeneralinformation {
+  dni                       String?
+  familyGroupId             Int?
+  memberNumber              Int?
+  credential                String?
+  documentType              String?
+  firstName                 String?
+  lastName                  String?
+  birthDate                 DateTime?
+  relationship              String?
+  validFrom                 DateTime?
+  validUntil                DateTime?
+  planname                  String?
+  situationobservations     String?
+  therapeuticsituationnames String?
+
+  @@map("affilitesgeneralinformation")
+}
