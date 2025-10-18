@@ -1,29 +1,22 @@
 const Affiliate = require("../domain/entities/Affiliate");
 
 class AffiliateMapper {
-    mapToEntity(data) {
+    map(data) {
+
         if (!data) return null;
 
         return new Affiliate({
-            dni: data.dni,                               // dni
-            grupoFamiliarId: data.familyGroupId,        // familyGroupId
-            numeroMiembro: data.memberNumber,           // memberNumber
-            credencial: data.credential,                // credential
-            tipoDocumento: data.documentType,           // documentType
-            nombre: data.firstName,                      // firstName
-            apellido: data.lastName,                     // lastName
-            fechaNacimiento: data.birthDate ? this.formatDate(data.birthDate) : null,  // birthDate
-            parentesco: data.relationship,              // relationship
-            validoDesde: data.validFrom ? this.formatDate(data.validFrom) : null,      // validFrom
-            validoHasta: data.validUntil ? this.formatDate(data.validUntil) : null,   // validUntil
-            nombrePlan: data.planname || null,          // planName
-            situacionesTerapeuticas: data.therapeuticsituationnames || [] // therapeuticSituations
+            idGrupoFamiliarFK: data.idGrupoFamiliarFK,
+            tipoDocumento: data.tipoDocumento,
+            apellido: data.apellido,
+            credencial: data.credencial,
+            direccion: data.direccion,
+            dni: data.dni,
+            email: data.email,
+            nombre: data.nombre,
+            parentesco: data.parentesco,
+            telefono: data.telefono
         });
-    }
-
-    formatDate(date) {
-        const parsed = new Date(date);
-        return isNaN(parsed) ? null : parsed.toLocaleDateString();
     }
 }
 

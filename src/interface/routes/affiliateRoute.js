@@ -13,10 +13,10 @@ const affiliateService = new AffiliateService(affiliateRepository);
 const affiliateController = new AffiliateController(affiliateService);
 
 
-router.get("/affiliates", (req, res) => affiliateController.list(req, res));
-router.post("/affiliates", (req, res) => affiliateController.create(req, res));
-router.delete("/affiliates/:dni", (req, res) => affiliateController.delete(req, res));
-router.get("/affiliates/:field", (req, res) => affiliateController.list(req, res));
-router.get("/affiliates/family/:familyGroupId", (req, res) => affiliateController.listFamilyGroup(req, res));
+router.get("/affiliates", (req, res) => affiliateController.findAll(req, res)); 
+// router.post("/affiliates", (req, res) => affiliateController.create(req, res));
+// router.delete("/affiliates/:dni", (req, res) => affiliateController.delete(req, res));
+// router.get("/affiliates/:field", (req, res) => affiliateController.list(req, res));
+// router.get("/affiliates/family/:familyGroupId", (req, res) => affiliateController.listFamilyGroup(req, res));
 
 module.exports = router;

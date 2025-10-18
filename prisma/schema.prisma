@@ -1,6 +1,5 @@
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["views"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -9,68 +8,42 @@ datasource db {
 }
 
 model Plan {
-  id           Int           @id @default(autoincrement())
-  name         String
-  familyGroups FamilyGroup[]
+  idPlan         Int             @id @default(autoincrement())
+  nombre         String          @db.VarChar(25)
+
+  gruposFamiliares GrupoFamiliar[]
 }
 
-model FamilyGroup {
-  id               Int         @id @default(autoincrement())
-  baseAffiliateNum String
-  planId           Int
-  createdAt        DateTime
-  affiliates       Affiliate[]
-  plan             Plan        @relation(fields: [planId], references: [id])
+model GrupoFamiliar {
+  idGrupoFamiliar Int          @id @default(autoincrement())
+  nroAfiliado     String       @db.VarChar(25)
+  idPlanFK        Int
+
+  plan       Plan        @relation(fields: [idPlanFK], references: [idPlan])
+  afiliados  Afiliado[]
 }
 
-model Affiliate {
-  dni           String               @id
-  familyGroupId Int
-  memberNumber  Int
-  credential    String
-  documentType  String
-  firstName     String
-  lastName      String
-  birthDate     DateTime
-  relationship  String
-  validFrom     DateTime
-  validUntil    DateTime?
-  familyGroup   FamilyGroup          @relation(fields: [familyGroupId], references: [id])
-  situations    AffiliateSituation[]
+model Afiliado {
+  dni                 Int            @id
+  idGrupoFamiliarFK   Int
+  grupoFamiliar       GrupoFamiliar  @relation(fields: [idGrupoFamiliarFK], references: [idGrupoFamiliar])
+
+  nombre              String         @db.VarChar(25)
+  apellido            String         @db.VarChar(25)
+  parentesco          String         @db.VarChar(25)
+  credencial          String         @db.VarChar(25)
+  email               String         @db.VarChar(50)
+  telefono            String         @db.VarChar(25)
+  direccion           String         @db.VarChar(25)
+  tipoDocumento       String         @db.VarChar(5)
+
+  situaciones         SituacionAfiliado[]
 }
 
-model TherapeuticSituation {
-  id                  Int                  @id @default(autoincrement())
-  name                String
-  affiliateSituations AffiliateSituation[]
-}
+model SituacionAfiliado {
+  idSituacionAfiliado Int       @id @default(autoincrement())
+  dniFK               Int
 
-model AffiliateSituation {
-  id          Int                  @id @default(autoincrement())
-  situationId Int
-  dni         String
-  startDate   DateTime
-  endDate     DateTime?
-  observation String?
-  affiliate   Affiliate            @relation(fields: [dni], references: [dni])
-  situation   TherapeuticSituation @relation(fields: [situationId], references: [id])
-}
-
-view affilitesgeneralinformation {
-  dni                       String?
-  familyGroupId             Int?
-  memberNumber              Int?
-  credential                String?
-  documentType              String?
-  firstName                 String?
-  lastName                  String?
-  birthDate                 DateTime?
-  relationship              String?
-  validFrom                 DateTime?
-  validUntil                DateTime?
-  planname                  String?
-  situationobservations     String?
-  therapeuticsituationnames String?
-
-  @@map("affilitesgeneralinformation")
+  afiliado            Afiliado  @relation(fields: [dniFK], references: [dni])
+  observacion         String    @db.VarChar(255)
 }
