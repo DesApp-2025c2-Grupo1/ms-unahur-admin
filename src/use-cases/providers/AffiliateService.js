@@ -1,25 +1,33 @@
-class ProviderService {
-    constructor(providerRepository) {
-        this.providerRepository = providerRepository;
+class AffiliateService {
+    constructor(affiliateRepository) {
+        this.affiliateRepository = affiliateRepository;
     }
 
-    async createProvider(data) {
-        const provider = await this.providerRepository.create(data);
-        return provider;
+    async findAll() {
+        return await this.affiliateRepository.findAll();
     }
 
-    async listProviders() {
-        return await this.providerRepository.findAll();
-    }
 
-    async delete(data) {
-        await this.providerRepository.delete(data);
-    }
+    // async createAffiliate(data) {
+    //     if (!data) {
+    //         throw new Error("Affiliate data is required");
+    //     }
+    //     return await this.affiliateRepository.create(data);
+    // }
 
-    async listFamilyGroup(data){
-        return await this.providerRepository.listFamilyGroup(data);
-    }
+    // async deleteAffiliate(identifier) {
+    //     if (!identifier) {
+    //         throw new Error("Identifier is required to delete an affiliate");
+    //     }
+    //     return await this.affiliateRepository.delete(identifier);
+    // }
 
+    // async listFamilyGroup(familyGroupId) {
+    //     if (!familyGroupId) {
+    //         throw new Error("Family group ID is required");
+    //     }
+    //     return await this.affiliateRepository.listFamilyGroup(familyGroupId);
+    // }
 }
 
-module.exports = ProviderService;
+module.exports = AffiliateService;

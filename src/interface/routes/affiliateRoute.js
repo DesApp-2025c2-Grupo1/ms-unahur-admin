@@ -1,20 +1,22 @@
 const express = require("express");
-const ProviderRepository = require("../../infrastructure/repositories/AffiliateRepository");
-const ProviderService = require("../../use-cases/providers/AffiliateService");
-const ProviderController = require("../controller/ProviderController");
+
+
+const AffiliateRepository = require("../../infrastructure/repositories/AffiliateRepository");
+const AffiliateService = require("../../use-cases/providers/AffiliateService");
+const AffiliateController = require("../controller/AffiliateController");
 
 const router = express.Router();
 
-// Instancias de los adaptadores y casos de uso
-const providerRepository = new ProviderRepository();
-const providerService = new ProviderService(providerRepository);
-const providerController = new ProviderController(providerService);
 
-// Rutas
-router.get("/affiliates", (req, res) => providerController.list(req, res));
-router.delete("/affiliates/:dni", (req, res) => providerController.delete(req, res));
-router.post("/affiliates", (req, res) => providerController.create(req, res));
-router.get("/affiliates/:field", (req, res) => providerController.list(req, res));
-router.get("/affiliates/family/:familyGroupId", (req, res) => providerController.listFamilyGroup(req, res));
+const affiliateRepository = new AffiliateRepository();
+const affiliateService = new AffiliateService(affiliateRepository);
+const affiliateController = new AffiliateController(affiliateService);
+
+
+router.get("/affiliates", (req, res) => affiliateController.findAll(req, res)); 
+// router.post("/affiliates", (req, res) => affiliateController.create(req, res));
+// router.delete("/affiliates/:dni", (req, res) => affiliateController.delete(req, res));
+// router.get("/affiliates/:field", (req, res) => affiliateController.list(req, res));
+// router.get("/affiliates/family/:familyGroupId", (req, res) => affiliateController.listFamilyGroup(req, res));
 
 module.exports = router;
