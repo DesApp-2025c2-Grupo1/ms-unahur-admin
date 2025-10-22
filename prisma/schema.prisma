@@ -42,8 +42,18 @@ model Afiliado {
 
 model SituacionAfiliado {
   idSituacionAfiliado Int       @id @default(autoincrement())
+  idSituacionFK       Int
   dniFK               Int
+  fechaInicio         DateTime
+  fechaFin            DateTime?
 
-  afiliado            Afiliado  @relation(fields: [dniFK], references: [dni])
-  observacion         String    @db.VarChar(255)
+  situacionTerapeutica SituacionTerapeutica @relation(fields: [idSituacionFK], references: [idSituacion])
+  afiliado             Afiliado             @relation(fields: [dniFK], references: [dni])
+}
+
+model SituacionTerapeutica {
+  idSituacion  Int                 @id @default(autoincrement())
+  nombre       String              @db.VarChar(100)
+
+  situacionesAfiliados SituacionAfiliado[]
 }
