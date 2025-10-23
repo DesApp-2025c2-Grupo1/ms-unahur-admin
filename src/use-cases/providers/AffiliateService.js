@@ -1,4 +1,5 @@
 class AffiliateService {
+
     constructor(affiliateRepository) {
         this.affiliateRepository = affiliateRepository;
     }
@@ -7,13 +8,13 @@ class AffiliateService {
         return await this.affiliateRepository.findAll();
     }
 
-
-    // async createAffiliate(data) {
-    //     if (!data) {
-    //         throw new Error("Affiliate data is required");
-    //     }
-    //     return await this.affiliateRepository.create(data);
-    // }
+    async createAffiliate(data) {
+        if (!data) {
+            throw new Error("Affiliate data is required");
+        }
+        // console.log(data);
+        return await this.affiliateRepository.create(data);
+    }
 
     // async deleteAffiliate(identifier) {
     //     if (!identifier) {

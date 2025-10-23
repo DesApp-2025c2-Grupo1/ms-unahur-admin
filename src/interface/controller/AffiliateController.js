@@ -5,24 +5,23 @@ class AffiliateController {
     async findAll(req, res) {
         try {
             const affiliates = await this.affiliateService.findAll();
+            console.log(affiliates)
             res.status(200).json({ affiliates });
         } catch (err) {
+            console.log(err)
             res.status(500).json();
         }
     }
 
-    // // Crear un nuevo afiliado
-    // async create(req, res) {
-    //     try {
-    //         const affiliate = await this.affiliateService.createAffiliate(req.body);
-    //         res.status(201).json({
-    //             message: "Afiliado creado correctamente",
-    //             data: affiliate
-    //         });
-    //     } catch (err) {
-    //         res.status(400).json({ error: err.message });
-    //     }
-    // }
+    async create(req, res) {
+        try {
+            const affiliates = await this.affiliateService.createAffiliate(req.body);
+            res.status(201).json({ message: "Afiliado creado correctamente" });
+        } catch (err) {
+            console.log(err);
+            res.status(500).json({ error: "No se pudo crear el afiliado" });
+        }
+    }
 
     // async delete(req, res) {
     //     try {
