@@ -24,7 +24,7 @@ model GrupoFamiliar {
 }
 
 model Afiliado {
-  dni                 Int            @id
+  dni                 String         @db.VarChar(25)   @id
   idGrupoFamiliarFK   Int
   grupoFamiliar       GrupoFamiliar  @relation(fields: [idGrupoFamiliarFK], references: [idGrupoFamiliar])
 
@@ -34,7 +34,7 @@ model Afiliado {
   credencial          String         @db.VarChar(25)
   email               String         @db.VarChar(50)
   telefono            String         @db.VarChar(25)
-  direccion           String         @db.VarChar(25)
+  direccion           String         @db.VarChar(50)
   tipoDocumento       String         @db.VarChar(5)
 
   situaciones         SituacionAfiliado[]
@@ -43,7 +43,7 @@ model Afiliado {
 model SituacionAfiliado {
   idSituacionAfiliado Int       @id @default(autoincrement())
   idSituacionFK       Int
-  dniFK               Int
+  dniFK               String         @db.VarChar(25)
   fechaInicio         DateTime
   fechaFin            DateTime?
 

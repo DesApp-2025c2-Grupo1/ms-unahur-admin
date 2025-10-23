@@ -1,111 +1,103 @@
-const { PrismaClient } = require('@prisma/client');
-const AffiliateMapper = require('../../mapper/AffiliateMapper');
+const { PrismaClient } = require('@prisma/client')
+const AffiliateMapper = require('../../mapper/AffiliateMapper')
 
-const prisma = new PrismaClient();
-const mapper = new AffiliateMapper();
+const prisma = new PrismaClient()
+const mapper = new AffiliateMapper()
 
 class AffiliateRepository {
-
     async findAll() {
         const affiliates = await prisma.afiliado.findMany({
-            where: { parentesco: 'Titular' }
-        });
-        return affiliates.map(aff => mapper.map(aff));
+            where: { parentesco: 'Titular' },
+            include: { grupoFamiliar: true }
+        })
+        return affiliates.map(aff => mapper.map(aff))
     }
 
-    async findAllFamilyGroup(familyGroupId) {
-        const affiliates = await prisma.affiliate.findMany({
-            where: { familyGroupId: parseInt(familyGroupId) }
-        });
-        return affiliates.map(a => mapper.mapToEntity(a));
+    async create({ dni, nombre, apellido, email, telefono, direccion, plan, familiares }) {
+        if (await this.existByDni(dni)) {
+            throw new Error("El DNI ya se encuentra registrado")
+        }
+        const count = await this.getCount()
+        const nextFamilyNumber = count + 1
+        const baseCredencial = nextFamilyNumber.toString().padStart(7, '0')
+
+        try {
+            const titular = await prisma.afiliado.create({
+                data: {
+                    dni,
+                    nombre,
+                    apellido,
+                    credencial: `${baseCredencial}-01`,
+                    parentesco: 'Titular',
+                    email,
+                    telefono,
+                    direccion,
+                    tipoDocumento: 'DNI',
+                    grupoFamiliar: {
+                        create: {
+                            idPlanFK: plan,
+                            nroAfiliado: baseCredencial
+                        }
+                    }
+                },
+                include: { grupoFamiliar: true }
+            })
+            if (familiares && familiares.length > 0) {
+                await this.insertFamily(titular, familiares, baseCredencial)
+            }
+            return null;
+        } catch (error) {
+            throw new Error("No se pudo crear el afiliado")
+        }
     }
 
-    // async create({ dni, firstName, lastName, birthDate, plan, relationship, familyGroupId, documentType, validFrom,validUntil}) {
-    //     try {
-    //         // Contar todos los afiliados existentes para el número global
-    //         const totalAffiliates = await prisma.affiliate.count();
-    //         const globalNumber = totalAffiliates + 1; // Incremental X
+    async insertFamily(titular, familiares, baseCredencial) {
+        try {
+            for (let index = 0; index < familiares.length; index++) {
+                const f = familiares[index]
+                if (await this.existByDni(f.dni)) {
+                    throw new Error(`El DNI ${f.dni} ya se encuentra registrado`)
+                }
+                const credencialFamiliar = `${baseCredencial}-${(index + 2).toString().padStart(2, '0')}`
+                await prisma.afiliado.create({
+                    data: {
+                        dni: f.dni,
+                        nombre: f.nombre,
+                        apellido: f.apellido,
+                        credencial: credencialFamiliar,
+                        parentesco: f.parentesco,
+                        email: f.email,
+                        telefono: f.telefono,
+                        direccion: f.direccion,
+                        tipoDocumento: 'DNI',
+                        grupoFamiliar: {
+                            connect: { idGrupoFamiliar: titular.grupoFamiliar.idGrupoFamiliar }
+                        }
+                    }
+                })
+            }
+        } catch (error) {
+            throw new Error("No se pudieron registrar los familiares")
+        }
+    }
 
-    //         // Contar cuántos miembros ya existen en este familyGroup
-    //         const familyCount = await prisma.affiliate.count({
-    //             where: { familyGroupId }
-    //         });
+    async getCount() {
+        try {
+            const count = await prisma.afiliado.count({
+                where: { parentesco: 'Titular' }
+            })
+            return count
+        } catch (error) {
+            throw new Error("Could not retrieve affiliate count")
+        }
+    }
 
-    //         // Si es titular, siempre 01; si no, incrementar
-    //         const memberNumber = relationship.toLowerCase() === 'titular' ? 1 : familyCount + 1;
-
-    //         // Generar credential
-    //         // Formato 000000X-YY
-    //         const credential = `000000${globalNumber}-${memberNumber.toString().padStart(2, '0')}`;
-
-    //         // Crear afiliado
-    //         const affiliate = await prisma.affiliate.create({
-    //             data: {
-    //                 dni,
-    //                 firstName,
-    //                 lastName,
-    //                 birthDate,
-    //                 // plan,
-    //                 familyGroupId,
-    //                 memberNumber,
-    //                 credential,
-    //                 relationship,
-    //                 documentType,
-    //                 validFrom: new Date(validFrom),
-    //                 validUntil: validUntil ? new Date(validUntil) : null
-    //             }
-    //         });
-
-    //         return affiliate;
-    //     } catch (err) {
-    //         throw new Error(`Error al crear el afiliado: ${err.message}`);
-    //     }
-    // }
-
-
-
-    // async delete(dni) {
-    //     try {
-    //         // Buscar al afiliado por DNI
-    //         const affiliate = await prisma.affiliate.findUnique({
-    //             where: { dni }
-    //         });
-
-    //         if (!affiliate) {
-    //             throw new Error('Afiliado no encontrado');
-    //         }
-
-    //         // Si es titular (memberNumber === 1), eliminar todo el grupo familiar
-    //         if (affiliate.memberNumber === 1) {
-    //             // Eliminar todos los afiliados del mismo familyGroup
-    //             const deletedGroup = await prisma.affiliate.deleteMany({
-    //                 where: { familyGroupId: affiliate.familyGroupId }
-    //             });
-    //             console.log(`Se eliminaron ${deletedGroup.count} afiliados del grupo familiar ${affiliate.familyGroupId}`);
-    //             return deletedGroup;
-    //         } else {
-    //             // Si no es titular, eliminar solo al afiliado
-    //             const deletedAffiliate = await prisma.affiliate.delete({
-    //                 where: { dni }
-    //             });
-    //             console.log(`Se eliminó al afiliado ${dni}`);
-    //             return deletedAffiliate;
-    //         }
-    //     } catch (err) {
-    //         throw new Error(`No se pudo eliminar el afiliado: ${err.message}`);
-    //     }
-    // }
-
-    // async listFamilyGroup(familyGroupId) {
-    //     try {
-    //         const affiliates = await prisma.affiliate.findMany({
-    //             where: { familyGroupId: parseInt(familyGroupId) }
-    //         });
-    //          return affiliates.map(a => mapper.mapToEntity(a));
-    //     } catch (err) {
-    //         throw new Error(`Error al listar el grupo familiar: ${err.message}`);
-    //     }
-    // }
+    async existByDni(dni) {
+        const affiliate = await prisma.afiliado.findUnique({
+            where: { dni }
+        })
+        return affiliate !== null
+    }
 }
 
-module.exports = AffiliateRepository;
+module.exports = AffiliateRepository
