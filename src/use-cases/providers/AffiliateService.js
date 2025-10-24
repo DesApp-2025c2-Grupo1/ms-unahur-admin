@@ -16,6 +16,20 @@ class AffiliateService {
         return await this.affiliateRepository.create(data);
     }
 
+    async getTherapeuticSituationsByDni(dni) {
+        if (!dni) {
+            throw new Error("DNI is required");
+        }
+
+        // verificar existencia del afiliado
+        const exists = await this.affiliateRepository.existByDni(dni);
+        if (!exists) {
+            return null; // controller manejará 404
+        }
+
+        return await this.affiliateRepository.getTherapeuticSituationsByDni(dni);
+    }
+
     // async deleteAffiliate(identifier) {
     //     if (!identifier) {
     //         throw new Error("Identifier is required to delete an affiliate");

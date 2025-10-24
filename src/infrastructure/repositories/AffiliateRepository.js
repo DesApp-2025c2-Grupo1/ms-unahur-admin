@@ -1,8 +1,10 @@
 const { PrismaClient } = require('@prisma/client')
 const AffiliateMapper = require('../../mapper/AffiliateMapper')
+const SituacionAfiliadoMapper = require('../../mapper/SituacionAfiliadoMapper')
 
 const prisma = new PrismaClient()
 const mapper = new AffiliateMapper()
+const situacionMapper = new SituacionAfiliadoMapper()
 
 class AffiliateRepository {
     async findAll() {
@@ -97,6 +99,20 @@ class AffiliateRepository {
             where: { dni }
         })
         return affiliate !== null
+    }
+
+    async getTherapeuticSituationsByDni(dni) {
+        try {
+            const situaciones = await prisma.situacionAfiliado.findMany({
+                where: { dniFK: dni },
+                include: { situacionTerapeutica: true },
+                orderBy: { fechaInicio: 'desc' }
+            })
+
+            return situaciones.map(s => situacionMapper.map(s))
+        } catch (error) {
+            throw new Error("No se pudieron obtener las situaciones terapéuticas")
+        }
     }
 }
 

@@ -23,6 +23,26 @@ class AffiliateController {
         }
     }
 
+    async getSituationsByDni(req, res) {
+        try {
+            const { dni } = req.params;
+            if (!dni) {
+                return res.status(400).json({ error: "DNI es requerido" });
+            }
+
+            const situaciones = await this.affiliateService.getTherapeuticSituationsByDni(dni);
+
+            if (situaciones === null) {
+                return res.status(404).json({ error: "Afiliado no encontrado" });
+            }
+
+            return res.status(200).json({ situaciones });
+        } catch (err) {
+            console.log(err);
+            return res.status(500).json({ error: "No se pudo obtener las situaciones terapéuticas" });
+        }
+    }
+
     // async delete(req, res) {
     //     try {
     //         const { dni } = req.params;
