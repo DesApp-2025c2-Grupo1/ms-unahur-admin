@@ -10,11 +10,19 @@ class AffiliateService {
 
     async createAffiliate(data) {
         if (!data) {
-            throw new Error("Affiliate data is required");
+            throw new Error("Los datos del afiliado son requeridos");
         }
         // console.log(data);
         return await this.affiliateRepository.create(data);
     }
+
+    async deleteAffiliate(dni) {
+        if (!dni) throw new Error("DNI es requerido para eliminar afiliado");
+        return await this.affiliateRepository.deleteByDni(dni);
+    }
+
+
+
 
     // async deleteAffiliate(identifier) {
     //     if (!identifier) {

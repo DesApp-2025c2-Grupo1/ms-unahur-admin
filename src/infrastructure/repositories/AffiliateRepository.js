@@ -45,9 +45,10 @@ class AffiliateRepository {
             if (familiares && familiares.length > 0) {
                 await this.insertFamily(titular, familiares, baseCredencial)
             }
-            return null;
+            return titular; // DEVUELVE EL TITULAR
         } catch (error) {
-            throw new Error("No se pudo crear el afiliado")
+            console.error("❌ Error en AffiliateRepository.create:", error)
+            throw error // re-lanzamos el error real
         }
     }
 
@@ -80,6 +81,35 @@ class AffiliateRepository {
             throw new Error("No se pudieron registrar los familiares")
         }
     }
+
+    async deleteByDni(dni) {
+        try {
+            // dni ya es string, no convertir
+            const affiliate = await prisma.afiliado.findUnique({
+                where: { dni },
+                include: { grupoFamiliar: true }
+            });
+
+            if (!affiliate) {
+                throw new Error('Afiliado no encontrado');
+            }
+
+            if (affiliate.parentesco === 'Titular') {
+                const deletedGroup = await prisma.afiliado.deleteMany({
+                    where: { idGrupoFamiliarFK: affiliate.idGrupoFamiliarFK }
+                });
+                return { message: `Se eliminaron ${deletedGroup.count} afiliados del grupo familiar` };
+            } else {
+                await prisma.afiliado.delete({
+                    where: { dni }
+                });
+                return { message: `Se eliminó al afiliado ${dni}` };
+            }
+        } catch (err) {
+            throw new Error(`No se pudo eliminar el afiliado: ${err.message}`);
+        }
+    }
+
 
     async getCount() {
         try {
