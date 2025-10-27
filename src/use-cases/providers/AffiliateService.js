@@ -37,12 +37,25 @@ class AffiliateService {
     //     return await this.affiliateRepository.delete(identifier);
     // }
 
-    // async listFamilyGroup(familyGroupId) {
-    //     if (!familyGroupId) {
-    //         throw new Error("Family group ID is required");
-    //     }
-    //     return await this.affiliateRepository.listFamilyGroup(familyGroupId);
-    // }
+    async listFamilyGroup(familyGroupId) {
+        if (!familyGroupId || isNaN(parseInt(familyGroupId))) {
+            throw new Error("ID de grupo familiar inválido");
+        }
+
+        const exists = await this.affiliateRepository.existFamilyGroup(familyGroupId);
+        if (!exists) {
+            return null; // controller -> 404
+        }
+
+        const result = await this.affiliateRepository.listFamilyGroup(familyGroupId);
+
+        // ordenar para que el Titular vaya primero
+        if (result && result.afiliados) {
+            result.afiliados.sort((a, b) => (a.parentesco === 'Titular' ? -1 : (b.parentesco === 'Titular' ? 1 : 0)));
+        }
+
+        return result;
+    }
 }
 
 module.exports = AffiliateService;

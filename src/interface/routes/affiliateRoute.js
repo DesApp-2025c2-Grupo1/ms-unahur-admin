@@ -18,6 +18,6 @@ router.post("/affiliates", (req, res) => affiliateController.create(req, res));
 router.get("/affiliates/:dni/situaciones_terapeuticas", (req, res) => affiliateController.getSituationsByDni(req, res));
 // router.delete("/affiliates/:dni", (req, res) => affiliateController.delete(req, res));
 // router.get("/affiliates/:field", (req, res) => affiliateController.list(req, res));
-// router.get("/affiliates/family/:familyGroupId", (req, res) => affiliateController.listFamilyGroup(req, res));
+router.get("/affiliates/family/:familyGroupId", (req, res) => affiliateController.listFamilyGroup(req, res));
 
 module.exports = router;

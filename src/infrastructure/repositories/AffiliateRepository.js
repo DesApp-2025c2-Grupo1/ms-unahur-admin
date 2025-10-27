@@ -114,6 +114,39 @@ class AffiliateRepository {
             throw new Error("No se pudieron obtener las situaciones terapéuticas")
         }
     }
+    
+    async existFamilyGroup(familyGroupId) {
+        try {
+            const grupo = await prisma.grupoFamiliar.findUnique({
+                where: { idGrupoFamiliar: parseInt(familyGroupId) }
+            })
+            return grupo !== null
+        } catch (error) {
+            throw new Error("No se pudo verificar la existencia del grupo familiar")
+        }
+    }
+
+    async listFamilyGroup(familyGroupId) {
+        try {
+            const grupo = await prisma.grupoFamiliar.findUnique({
+                where: { idGrupoFamiliar: parseInt(familyGroupId) },
+                include: { plan: true }
+            })
+
+            if (!grupo) return null
+
+            const miembros = await prisma.afiliado.findMany({
+                where: { idGrupoFamiliarFK: parseInt(familyGroupId) }
+            })
+
+            // mapear afiliados usando el mapper existente
+            const mapped = miembros.map(m => mapper.map(m))
+
+            return { grupo, afiliados: mapped }
+        } catch (error) {
+            throw new Error("No se pudieron obtener los miembros del grupo familiar")
+        }
+    }
 }
 
 module.exports = AffiliateRepository
