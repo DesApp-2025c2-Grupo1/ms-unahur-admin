@@ -1,0 +1,59 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Plan {
+  idPlan         Int             @id @default(autoincrement())
+  nombre         String          @db.VarChar(25)
+
+  gruposFamiliares GrupoFamiliar[]
+}
+
+model GrupoFamiliar {
+  idGrupoFamiliar Int          @id @default(autoincrement())
+  nroAfiliado     String       @db.VarChar(25)
+  idPlanFK        Int
+
+  plan       Plan        @relation(fields: [idPlanFK], references: [idPlan])
+  afiliados  Afiliado[]
+}
+
+model Afiliado {
+  dni                 String         @db.VarChar(25)   @id
+  idGrupoFamiliarFK   Int
+  grupoFamiliar       GrupoFamiliar  @relation(fields: [idGrupoFamiliarFK], references: [idGrupoFamiliar])
+
+  nombre              String         @db.VarChar(25)
+  apellido            String         @db.VarChar(25)
+  parentesco          String         @db.VarChar(25)
+  credencial          String         @db.VarChar(25)
+  email               String         @db.VarChar(50)
+  telefono            String         @db.VarChar(25)
+  direccion           String         @db.VarChar(50)
+  tipoDocumento       String         @db.VarChar(5)
+
+  situaciones         SituacionAfiliado[]
+}
+
+model SituacionAfiliado {
+  idSituacionAfiliado Int       @id @default(autoincrement())
+  idSituacionFK       Int
+  dniFK               String         @db.VarChar(25)
+  fechaInicio         DateTime
+  fechaFin            DateTime?
+
+  situacionTerapeutica SituacionTerapeutica @relation(fields: [idSituacionFK], references: [idSituacion])
+  afiliado             Afiliado             @relation(fields: [dniFK], references: [dni])
+}
+
+model SituacionTerapeutica {
+  idSituacion  Int                 @id @default(autoincrement())
+  nombre       String              @db.VarChar(100)
+
+  situacionesAfiliados SituacionAfiliado[]
+}
