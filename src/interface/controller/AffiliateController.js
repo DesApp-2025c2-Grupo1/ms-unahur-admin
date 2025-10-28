@@ -13,15 +13,45 @@ class AffiliateController {
         }
     }
 
+    //    async create(req, res) {
+    //       try {
+    //            const affiliates = await this.affiliateService.createAffiliate(req.body);
+    //            res.status(201).json({ message: "Afiliado creado correctamente" });
+    //        } catch (err) {
+    //            console.log(err);
+    //            res.status(500).json({ error: "No se pudo crear el afiliado" });
+    //        }
+    //    }
+
     async create(req, res) {
         try {
-            const affiliates = await this.affiliateService.createAffiliate(req.body);
-            res.status(201).json({ message: "Afiliado creado correctamente" });
+            const affiliate = await this.affiliateService.createAffiliate(req.body);
+            res.status(201).json({
+                message: "Afiliado creado correctamente",
+                data: affiliate
+            });
         } catch (err) {
-            console.log(err);
-            res.status(500).json({ error: "No se pudo crear el afiliado" });
+            console.error("❌ Error en AffiliateController.create:", err); // 🔍 muestra todo el error
+            res.status(400).json({
+                error: err.message || "Error desconocido al crear el afiliado",
+                detalle: err.meta || null, // Prisma a veces guarda info útil acá
+                code: err.code || null
+            });
         }
     }
+
+
+    async delete(req, res) {
+        try {
+            const { dni } = req.params;
+            const result = await this.affiliateService.deleteAffiliate(dni);
+            res.status(200).json(result);
+        } catch (err) {
+            res.status(400).json({ error: err.message });
+        }
+    }
+
+
 
     // async delete(req, res) {
     //     try {
