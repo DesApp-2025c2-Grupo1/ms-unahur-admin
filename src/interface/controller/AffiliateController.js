@@ -5,10 +5,8 @@ class AffiliateController {
     async findAll(req, res) {
         try {
             const affiliates = await this.affiliateService.findAll();
-            console.log(affiliates)
             res.status(200).json({ affiliates });
         } catch (err) {
-            console.log(err)
             res.status(500).json();
         }
     }

@@ -10,8 +10,19 @@ class AffiliateRepository {
     async findAll() {
         const affiliates = await prisma.afiliado.findMany({
             where: { parentesco: 'Titular' },
-            include: { grupoFamiliar: true }
-        })
+            include: {
+                grupoFamiliar: {
+                    include: {
+                        plan: {
+                            select: {
+                                idPlan: true,
+                                nombre: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
         return affiliates.map(aff => mapper.map(aff))
     }
 
@@ -144,7 +155,7 @@ class AffiliateRepository {
             throw new Error("No se pudieron obtener las situaciones terapéuticas")
         }
     }
-    
+
     async existFamilyGroup(familyGroupId) {
         try {
             const grupo = await prisma.grupoFamiliar.findUnique({

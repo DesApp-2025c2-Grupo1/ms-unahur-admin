@@ -36,6 +36,9 @@ model Afiliado {
   telefono            String         @db.VarChar(25)
   direccion           String         @db.VarChar(50)
   tipoDocumento       String         @db.VarChar(5)
+  fecha_alta          DateTime?
+  fecha_nacimiento    DateTime?
+  es_programada       Boolean        @default(false)
 
   situaciones         SituacionAfiliado[]
 }
