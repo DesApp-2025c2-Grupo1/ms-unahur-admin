@@ -1,8 +1,10 @@
 const { PrismaClient } = require('@prisma/client')
 const AffiliateMapper = require('../../mapper/AffiliateMapper')
+const SituacionAfiliadoMapper = require('../../mapper/SituacionAfiliadoMapper')
 
 const prisma = new PrismaClient()
 const mapper = new AffiliateMapper()
+const situacionMapper = new SituacionAfiliadoMapper()
 
 class AffiliateRepository {
     async findAll() {
@@ -127,6 +129,53 @@ class AffiliateRepository {
             where: { dni }
         })
         return affiliate !== null
+    }
+
+    async getTherapeuticSituationsByDni(dni) {
+        try {
+            const situaciones = await prisma.situacionAfiliado.findMany({
+                where: { dniFK: dni },
+                include: { situacionTerapeutica: true },
+                orderBy: { fechaInicio: 'desc' }
+            })
+
+            return situaciones.map(s => situacionMapper.map(s))
+        } catch (error) {
+            throw new Error("No se pudieron obtener las situaciones terapéuticas")
+        }
+    }
+    
+    async existFamilyGroup(familyGroupId) {
+        try {
+            const grupo = await prisma.grupoFamiliar.findUnique({
+                where: { idGrupoFamiliar: parseInt(familyGroupId) }
+            })
+            return grupo !== null
+        } catch (error) {
+            throw new Error("No se pudo verificar la existencia del grupo familiar")
+        }
+    }
+
+    async listFamilyGroup(familyGroupId) {
+        try {
+            const grupo = await prisma.grupoFamiliar.findUnique({
+                where: { idGrupoFamiliar: parseInt(familyGroupId) },
+                include: { plan: true }
+            })
+
+            if (!grupo) return null
+
+            const miembros = await prisma.afiliado.findMany({
+                where: { idGrupoFamiliarFK: parseInt(familyGroupId) }
+            })
+
+            // mapear afiliados usando el mapper existente
+            const mapped = miembros.map(m => mapper.map(m))
+
+            return { grupo, afiliados: mapped }
+        } catch (error) {
+            throw new Error("No se pudieron obtener los miembros del grupo familiar")
+        }
     }
 }
 

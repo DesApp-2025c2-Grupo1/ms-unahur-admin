@@ -40,6 +40,26 @@ class AffiliateController {
         }
     }
 
+    async getSituationsByDni(req, res) {
+        try {
+            const { dni } = req.params;
+            if (!dni) {
+                return res.status(400).json({ error: "DNI es requerido" });
+            }
+
+            const situaciones = await this.affiliateService.getTherapeuticSituationsByDni(dni);
+
+            if (situaciones === null) {
+                return res.status(404).json({ error: "Afiliado no encontrado" });
+            }
+
+            return res.status(200).json({ situaciones });
+        } catch (err) {
+            console.log(err);
+            return res.status(500).json({ error: "No se pudo obtener las situaciones terapéuticas" });
+        }
+    }
+
 
     async delete(req, res) {
         try {
@@ -66,19 +86,25 @@ class AffiliateController {
     //         res.status(404).json({ error: err.message });
     //     }
     // }
-    // async listFamilyGroup(req, res) {
-    //     try {
-    //         const { familyGroupId } = req.params;
-    //         if (!familyGroupId) {
-    //             return res.status(400).json({ error: "El ID del grupo familiar es requerido" });
-    //         }
+    async listFamilyGroup(req, res) {
+        try {
+            const { familyGroupId } = req.params;
+            if (!familyGroupId) {
+                return res.status(400).json({ error: "El ID del grupo familiar es requerido" });
+            }
 
-    //         const familyGroup = await this.affiliateService.listFamilyGroup(familyGroupId);
-    //         res.status(200).json(familyGroup);
-    //     } catch (err) {
-    //         res.status(500).json({ error: err.message });
-    //     }
-    // }
+            const result = await this.affiliateService.listFamilyGroup(familyGroupId);
+
+            if (result === null) {
+                return res.status(404).json({ error: "Grupo familiar no encontrado" });
+            }
+
+            return res.status(200).json({ grupo: result.grupo, afiliados: result.afiliados });
+        } catch (err) {
+            console.log(err);
+            return res.status(500).json({ error: err.message });
+        }
+    }
 }
 
 module.exports = AffiliateController;
