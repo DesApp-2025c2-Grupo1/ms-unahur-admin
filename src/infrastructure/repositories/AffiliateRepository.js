@@ -55,10 +55,10 @@ class AffiliateRepository {
                         }
                     },
                     emails: {
-                        create: emails?.map(e => ({ email: e.email, tipo: e.tipo || 'personal' }))
+                        create: emails?.map(e => ({ email: e.email }))
                     },
                     telefonos: {
-                        create: telefonos?.map(t => ({ telefono: t.telefono, tipo: t.tipo || 'personal' }))
+                        create: telefonos?.map(t => ({ telefono: t.telefono }))
                     }
                 },
                 include: { grupoFamiliar: true, emails: true, telefonos: true }
@@ -103,8 +103,8 @@ class AffiliateRepository {
                         direccion: f.direccion,
                         tipoDocumento: 'DNI',
                         grupoFamiliar: { connect: { idGrupoFamiliar: titular.grupoFamiliar.idGrupoFamiliar } },
-                        emails: { create: f.emails?.map(e => ({ email: e.email, tipo: e.tipo || 'personal' })) },
-                        telefonos: { create: f.telefonos?.map(t => ({ telefono: t.telefono, tipo: t.tipo || 'personal' })) }
+                        emails: { create: f.emails?.map(e => ({ email: e.email })) },
+                        telefonos: { create: f.telefonos?.map(t => ({ telefono: t.telefono })) }
                     }
                 });
 
@@ -140,8 +140,8 @@ class AffiliateRepository {
 
 
     // Editar afiliado
-    async update({ dni, nombre, apellido, email, telefono, direccion, plan }) {
-        if (await this.existByDni(dni)) {
+    async update({ dni, nombre, apellido, email, telefono, direccion, new_dni }) {
+        if (await this.existByDni(new_dni)) {
             throw new Error('El DNI ya se encuentra registrado');
         }
 
@@ -149,7 +149,7 @@ class AffiliateRepository {
             const titular = await prisma.afiliado.update({
                 where: { dni: dni },
                 data: {
-                    dni,
+                    dni: new_dni,
                     nombre,
                     apellido,
                     email,
@@ -160,6 +160,7 @@ class AffiliateRepository {
             });
             return null;
         } catch (error) {
+            console.log(error)
             throw new Error('No se pudo editar el afiliado');
         }
     }
@@ -167,10 +168,11 @@ class AffiliateRepository {
 
     // Eliminar afiliado o grupo familiar por DNI
     async deleteByDni(dni) {
+        let dnisToDelete = [];
         try {
             const affiliate = await prisma.afiliado.findUnique({
                 where: { dni },
-                include: { grupoFamiliar: true }
+                include: { grupoFamiliar: true } // incluye todos los miembros del grupo
             });
 
             if (!affiliate) {
@@ -178,19 +180,42 @@ class AffiliateRepository {
             }
 
             if (affiliate.parentesco === 'Titular') {
-                const deletedGroup = await prisma.afiliado.deleteMany({
+                const groupMembers = await prisma.afiliado.findMany({
                     where: { idGrupoFamiliarFK: affiliate.idGrupoFamiliarFK }
                 });
-                return { message: `Se eliminaron ${deletedGroup.count} afiliados del grupo familiar` };
+
+                dnisToDelete = groupMembers.map(a => a.dni);
+            } else {
+                dnisToDelete = [affiliate.dni];
             }
 
-            await prisma.afiliado.delete({ where: { dni } });
-            return { message: `Se eliminó al afiliado con DNI ${dni}` };
+            // 1️⃣ Eliminar teléfonos relacionados
+            await prisma.afiliadoTelefono.deleteMany({
+                where: { dniFK: { in: dnisToDelete } }
+            });
+
+            // 2️⃣ Eliminar emails relacionados
+            await prisma.afiliadoEmail.deleteMany({
+                where: { dniFK: { in: dnisToDelete } }
+            });
+
+            // 3️⃣ Eliminar situaciones terapéuticas
+            await prisma.situacionAfiliado.deleteMany({
+                where: { dniFK: { in: dnisToDelete } }
+            });
+
+            // 4️⃣ Finalmente, eliminar afiliados
+            const deleted = await prisma.afiliado.deleteMany({
+                where: { dni: { in: dnisToDelete } }
+            });
+
+
+            return { message: `Se eliminaron ${deleted.count} afiliados` };
         } catch (error) {
+            console.log(error)
             throw new Error(`No se pudo eliminar el afiliado: ${error.message}`);
         }
     }
-
     // Obtener situaciones terapéuticas por DNI
     async getTherapeuticSituationsByDni(dni) {
         try {

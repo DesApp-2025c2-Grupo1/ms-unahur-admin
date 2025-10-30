@@ -1,9 +1,9 @@
 const { body } = require('express-validator');
 
 const validateAffiliate = [
-    body('tipoDocumento')
-        .notEmpty().withMessage('El tipo de documento es obligatorio')
-        .isIn(['DNI', 'LC', 'LE', 'Pasaporte']).withMessage('El tipo de documento no es válido'),
+    // body('tipoDocumento')
+    //     .notEmpty().withMessage('El tipo de documento es obligatorio')
+    //     .isIn(['DNI', 'LC', 'LE', 'Pasaporte']).withMessage('El tipo de documento no es válido'),
 
     body('dni')
         .notEmpty().withMessage('El DNI es obligatorio')
@@ -18,9 +18,9 @@ const validateAffiliate = [
         .notEmpty().withMessage('El apellido es obligatorio')
         .isString().withMessage('El apellido debe ser texto'),
 
-    body('parentesco')
-        .notEmpty().withMessage('El parentesco es obligatorio')
-        .isIn(['Titular', 'Hijo', 'Hija', 'Cónyuge', 'Padre', 'Otro']).withMessage('El parentesco no es válido'),
+    // body('parentesco')
+    //     .notEmpty().withMessage('El parentesco es obligatorio')
+    //     .isIn(['Titular', 'Hijo', 'Hija', 'Cónyuge', 'Padre', 'Otro']).withMessage('El parentesco no es válido'),
 
     body('email')
         .optional()

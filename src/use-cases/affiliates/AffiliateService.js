@@ -44,16 +44,6 @@ class AffiliateService {
         return await this.affiliateRepository.deleteByDni(dni);
     }
 
-
-
-
-    // async deleteAffiliate(identifier) {
-    //     if (!identifier) {
-    //         throw new Error("Identifier is required to delete an affiliate");
-    //     }
-    //     return await this.affiliateRepository.delete(identifier);
-    // }
-
     async listFamilyGroup(familyGroupId) {
         if (!familyGroupId || isNaN(parseInt(familyGroupId))) {
             throw new Error("ID de grupo familiar inválido");

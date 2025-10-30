@@ -34,7 +34,7 @@ class AffiliateController {
     // Editar un afiliado
     async update(req, res) {
         try {
-            const affiliate = await this.affiliateService.updateAffiliate(req.body);
+            const affiliate = await this.affiliateService.upateAffiliate(req.body);
             return res.status(201).json({
                 success: true,
                 message: "Afiliado creado exitosamente",
@@ -112,7 +112,7 @@ class AffiliateController {
     }
 
     // Listar grupo familiar
-    async listFamilyGroup(req, res) {
+    async getByFamilyGroupId(req, res) {
         try {
             const { familyGroupId } = req.params;
 
