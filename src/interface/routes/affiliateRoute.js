@@ -2,30 +2,22 @@ const express = require("express");
 const AffiliateRepository = require("../../infrastructure/repositories/AffiliateRepository");
 const AffiliateService = require("../../use-cases/providers/AffiliateService");
 const AffiliateController = require("../controller/AffiliateController");
-const { validarAfiliado } = require("../validators/AffiliateValidator");
-const { validarCampos } = require("../middleware/validationMiddleware");
+const { validateAffiliate } = require("../validators/AffiliateValidator");
+const { validateFields } = require("../middleware/validationMiddleware");
 
 const router = express.Router();
 
 
-const affiliateRepository = new AffiliateRepository();
-const affiliateService = new AffiliateService(affiliateRepository);
-const affiliateController = new AffiliateController(affiliateService);
+const repository = new AffiliateRepository();
+const service = new AffiliateService(repository);
+const controller = new AffiliateController(service);
 
-router.delete("/grupo_familiar/:dni", (req, res) => affiliateController.delete(req, res));
-router.get("/affiliates", (req, res) => affiliateController.findAll(req, res)); 
-router.post("/affiliates", (req, res) => affiliateController.create(req, res));
-router.get("/affiliates/:dni/situaciones_terapeuticas", (req, res) => affiliateController.getSituationsByDni(req, res));
-// router.delete("/affiliates/:dni", (req, res) => affiliateController.delete(req, res));
-// router.get("/affiliates/:field", (req, res) => affiliateController.list(req, res));
-router.get("/affiliates/family/:familyGroupId", (req, res) => affiliateController.listFamilyGroup(req, res));
-
-router.post(
-  "/affiliates",
-  validarAfiliado,    // reglas de validación
-  validarCampos,      // middleware que maneja errores
-  (req, res) => affiliateController.create(req, res)
-);
+router.get("/affiliates", (req, res) => controller.findAll(req, res));
+router.get("/affiliates/:dni", (req, res) => controller.getByDni(req, res));
+router.put("/affiliates/:dni", validateFields, validateAffiliate, (req, res) => controller.update(req, res));
+router.delete("/affiliates/:dni", (req, res) => controller.deleteByDni(req, res));
+router.get("/affiliates/family/:familyGroupId", (req, res) => controller.getByFamilyGroupId(req, res));
+router.post("/affiliates", validateAffiliate, validateFields, (req, res) => controller.create(req, res));
 
 
 
