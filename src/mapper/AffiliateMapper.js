@@ -15,9 +15,20 @@ class AffiliateMapper {
             email: data.email,
             nombre: data.nombre,
             parentesco: data.parentesco,
-            telefono: data.telefono
+            telefono: data.telefono,
+            plan: data.grupoFamiliar?.plan?.nombre,
+            fecha_nacimiento: formatDate(data.fecha_nacimiento)
         });
     }
+}
+
+function formatDate(date) {
+    if (!date) return null;
+    const d = new Date(date);
+    d.formattedDate = d.getDate().toString().padStart(2, '0') + '-' +
+        (d.getMonth() + 1).toString().padStart(2, '0') + '-' +
+        d.getFullYear();
+    return d.formattedDate;
 }
 
 module.exports = AffiliateMapper;

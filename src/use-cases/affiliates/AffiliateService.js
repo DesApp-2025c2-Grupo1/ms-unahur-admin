@@ -16,6 +16,14 @@ class AffiliateService {
         return await this.affiliateRepository.create(data);
     }
 
+    async upateAffiliate(data) {
+        if (!data) {
+            throw new Error("Los datos del afiliado son requeridos");
+        }
+        // console.log(data);
+        return await this.affiliateRepository.update(data);
+    }
+
     async getTherapeuticSituationsByDni(dni) {
         if (!dni) {
             throw new Error("DNI is required");

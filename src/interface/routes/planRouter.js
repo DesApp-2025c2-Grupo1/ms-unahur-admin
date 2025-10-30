@@ -6,11 +6,10 @@ const PlanController = require("../controller/PlanController");
 
 const router = express.Router();
 
-const planRepository = new PlanRepository();
-const planService = new PlanService(planRepository);
-const planController = new PlanController(planService);
+const repository = new PlanRepository();
+const service = new PlanService(repository);
+const controller = new PlanController(service);
 
-
-router.get("/plans", (req, res) => planController.findAll(req, res));
+router.get("/plans", (req, res) => controller.findAll(req, res));
 
 module.exports = router;

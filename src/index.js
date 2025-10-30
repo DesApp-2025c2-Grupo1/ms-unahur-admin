@@ -1,14 +1,24 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-const affiliateRoute = require("./interface/routes/affiliateRoute");
-const therapeuticSituationRoute = require("./interface/routes/TherapeuticSituationRoute");
+const express = require('express');
+const bodyParser = require('body-parser');
 const cors = require('cors');
+const swaggerUi = require('swagger-ui-express');
+const swaggerFile = require('../swagger_output.json');
+
+// Rutas
+const affiliateRoute = require('./interface/routes/affiliateRoute');
+const therapeuticSituationRoute = require('./interface/routes/TherapeuticSituationRoute');
+const planRoute = require('./interface/routes/planRouter');
 
 const app = express();
-app.use(cors())
+app.use(cors());
 app.use(bodyParser.json());
 
-app.use("/api", affiliateRoute);
-app.use("/api", therapeuticSituationRoute);
+// Swagger
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
-app.listen(3000, () => console.log("Server running on port 3000"));
+// Rutas
+app.use(affiliateRoute);
+app.use(therapeuticSituationRoute);
+app.use(planRoute);
+
+app.listen(3000, () => console.log('Server running'));

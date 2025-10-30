@@ -10,7 +10,7 @@ const repository = new TherapeuticSituationRepository();
 const service = new TherapeuticSituationService(repository);
 const controller = new TherapeuticSituationController(service);
 
-router.get("/situaciones_terapeuticas", (req, res) => controller.findAll(req, res));
-router.get("/situaciones_terapeuticas/:id", (req, res) => controller.findById(req, res));
+router.get("/therapeutic", (req, res) => controller.findAll(req, res));
+router.get("/therapeutic/:id", (req, res) => controller.findById(req, res));
 
 module.exports = router;

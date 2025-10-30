@@ -8,8 +8,8 @@ datasource db {
 }
 
 model Plan {
-  idPlan         Int             @id @default(autoincrement())
-  nombre         String          @db.VarChar(25)
+  idPlan          Int             @id @default(autoincrement())
+  nombre          String          @db.VarChar(25)
 
   gruposFamiliares GrupoFamiliar[]
 }
@@ -24,7 +24,7 @@ model GrupoFamiliar {
 }
 
 model Afiliado {
-  dni                 String         @db.VarChar(25)   @id
+  dni                 String         @db.VarChar(25) @id
   idGrupoFamiliarFK   Int
   grupoFamiliar       GrupoFamiliar  @relation(fields: [idGrupoFamiliarFK], references: [idGrupoFamiliar])
 
@@ -32,18 +32,41 @@ model Afiliado {
   apellido            String         @db.VarChar(25)
   parentesco          String         @db.VarChar(25)
   credencial          String         @db.VarChar(25)
-  email               String         @db.VarChar(50)
-  telefono            String         @db.VarChar(25)
   direccion           String         @db.VarChar(50)
   tipoDocumento       String         @db.VarChar(5)
+  fecha_alta          DateTime?
+  fecha_nacimiento    DateTime?
+  es_programada       Boolean        @default(false)
 
+  emails              AfiliadoEmail[]
+  telefonos           AfiliadoTelefono[]
   situaciones         SituacionAfiliado[]
+}
+
+model AfiliadoEmail {
+  id         Int      @id @default(autoincrement())
+  dniFK      String   @db.VarChar(25)
+  email      String   @db.VarChar(50)
+
+  afiliado   Afiliado @relation(fields: [dniFK], references: [dni])
+
+  @@unique([dniFK, email])
+}
+
+model AfiliadoTelefono {
+  id         Int      @id @default(autoincrement())
+  dniFK      String   @db.VarChar(25)
+  telefono   String   @db.VarChar(25)
+  
+  afiliado   Afiliado @relation(fields: [dniFK], references: [dni])
+
+  @@unique([dniFK, telefono])
 }
 
 model SituacionAfiliado {
   idSituacionAfiliado Int       @id @default(autoincrement())
   idSituacionFK       Int
-  dniFK               String         @db.VarChar(25)
+  dniFK               String    @db.VarChar(25)
   fechaInicio         DateTime
   fechaFin            DateTime?
 
