@@ -2,9 +2,7 @@ const Affiliate = require("../domain/entities/Affiliate");
 
 class AffiliateMapper {
     map(data) {
-
         if (!data) return null;
-
         return new Affiliate({
             idGrupoFamiliarFK: data.idGrupoFamiliarFK,
             tipoDocumento: data.tipoDocumento,
@@ -16,19 +14,13 @@ class AffiliateMapper {
             nombre: data.nombre,
             parentesco: data.parentesco,
             telefono: data.telefono,
-            plan: data.grupoFamiliar?.plan?.nombre,
-            fecha_nacimiento: formatDate(data.fecha_nacimiento)
+            plan: data.grupoFamiliar?.plan?.nombre
         });
     }
-}
-
-function formatDate(date) {
-    if (!date) return null;
-    const d = new Date(date);
-    d.formattedDate = d.getDate().toString().padStart(2, '0') + '-' +
-        (d.getMonth() + 1).toString().padStart(2, '0') + '-' +
-        d.getFullYear();
-    return d.formattedDate;
+    mapList(data) {
+        if (!Array.isArray(data)) return [];
+        return data.map(x => this.map(x));
+    }
 }
 
 module.exports = AffiliateMapper;

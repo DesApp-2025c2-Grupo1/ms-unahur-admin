@@ -1,36 +1,41 @@
-class AffiliateController {
-    constructor(affiliateService) {
-        this.affiliateService = affiliateService;
-    }
+const AffiliateService = require('../../infrastructure/services/AffiliateService')
+const AffiliateMapper = require('../../mapper/AffiliateMapper');
 
-    // Obtener todos los afiliados
+// 
+const service = new AffiliateService();
+const mapper = new AffiliateMapper();
+
+class AffiliateController {
+
     async findAll(req, res) {
         try {
-            const affiliates = await this.affiliateService.findAll();
-            res.status(200).json({ affiliates });
+            const affiliates = await service.findAll();
+            res.status(200).json({ affiliates: mapper.mapList(affiliates) })
         } catch (err) {
-            res.status(500).json();
+            console.log(err)
+            res.status(500).json(err)
         }
     }
 
-    // Crear un nuevo afiliado
-    async create(req, res) {
-        try {
-            const affiliate = await this.affiliateService.createAffiliate(req.body);
-            return res.status(201).json({
-                success: true,
-                message: "Afiliado creado exitosamente",
-                data: affiliate
-            });
-        } catch (err) {
-            return res.status(400).json({
-                success: false,
-                message: "Error al crear el afiliado",
-                error: err.message
-            });
-        }
-    }
+    // // Crear un nuevo afiliado
+    // async create(req, res) {
+    //     try {
+    //         const affiliate = await this.affiliateService.createAffiliate(req.body);
+    //         return res.status(201).json({
+    //             success: true,
+    //             message: "Afiliado creado exitosamente",
+    //             data: affiliate
+    //         });
+    //     } catch (err) {
+    //         return res.status(400).json({
+    //             success: false,
+    //             message: "Error al crear el afiliado",
+    //             error: err.message
+    //         });
+    //     }
+    // }
 
+<<<<<<< Updated upstream
     // Editar un afiliado
     async update(req, res) {
         try {
@@ -48,106 +53,132 @@ class AffiliateController {
             });
         }
     }
+=======
+    // // Editar un afiliado
+    // async update(req, res) {
+    //     try {
+    //         const affiliate = await this.affiliateService.updateAffiliate(req.body);
+    //         return res.status(201).json({
+    //             success: true,
+    //             message: "Afiliado creado exitosamente",
+    //             data: affiliate
+    //         });
+    //     } catch (err) {
+    //         return res.status(400).json({
+    //             success: false,
+    //             message: "Error al crear el afiliado",
+    //             error: err.message
+    //         });
+    //     }
+    // }
+>>>>>>> Stashed changes
 
-    // Obtener situaciones terapéuticas por DNI
-    async getSituationsByDni(req, res) {
-        try {
-            const { dni } = req.params;
+    // // Obtener situaciones terapéuticas por DNI
+    // async getSituationsByDni(req, res) {
+    //     try {
+    //         const { dni } = req.params;
 
-            if (!dni) {
-                return res.status(400).json({
-                    success: false,
-                    message: "El DNI es requerido"
-                });
-            }
+    //         if (!dni) {
+    //             return res.status(400).json({
+    //                 success: false,
+    //                 message: "El DNI es requerido"
+    //             });
+    //         }
 
-            const situaciones = await this.affiliateService.getTherapeuticSituationsByDni(dni);
+    //         const situaciones = await this.affiliateService.getTherapeuticSituationsByDni(dni);
 
-            if (!situaciones) {
-                return res.status(404).json({
-                    success: false,
-                    message: "Afiliado no encontrado"
-                });
-            }
+    //         if (!situaciones) {
+    //             return res.status(404).json({
+    //                 success: false,
+    //                 message: "Afiliado no encontrado"
+    //             });
+    //         }
 
-            return res.status(200).json({
-                success: true,
-                data: situaciones
-            });
-        } catch (err) {
-            return res.status(500).json({
-                success: false,
-                message: "No se pudieron obtener las situaciones terapéuticas",
-                error: err.message
-            });
-        }
-    }
+    //         return res.status(200).json({
+    //             success: true,
+    //             data: situaciones
+    //         });
+    //     } catch (err) {
+    //         return res.status(500).json({
+    //             success: false,
+    //             message: "No se pudieron obtener las situaciones terapéuticas",
+    //             error: err.message
+    //         });
+    //     }
+    // }
 
-    // Eliminar afiliado por DNI
-    async deleteByDni(req, res) {
-        try {
-            const { dni } = req.params;
+    // // Eliminar afiliado por DNI
+    // async deleteByDni(req, res) {
+    //     try {
+    //         const { dni } = req.params;
 
-            if (!dni) {
-                return res.status(400).json({
-                    success: false,
-                    message: "El DNI es requerido"
-                });
-            }
+    //         if (!dni) {
+    //             return res.status(400).json({
+    //                 success: false,
+    //                 message: "El DNI es requerido"
+    //             });
+    //         }
 
-            const result = await this.affiliateService.deleteAffiliate(dni);
+    //         const result = await this.affiliateService.deleteAffiliate(dni);
 
-            return res.status(200).json({
-                success: true,
-                message: "Afiliado eliminado correctamente",
-                data: result
-            });
-        } catch (err) {
-            return res.status(400).json({
-                success: false,
-                message: "Error al eliminar el afiliado",
-                error: err.message
-            });
-        }
-    }
+    //         return res.status(200).json({
+    //             success: true,
+    //             message: "Afiliado eliminado correctamente",
+    //             data: result
+    //         });
+    //     } catch (err) {
+    //         return res.status(400).json({
+    //             success: false,
+    //             message: "Error al eliminar el afiliado",
+    //             error: err.message
+    //         });
+    //     }
+    // }
 
+<<<<<<< Updated upstream
     // Listar grupo familiar
     async getByFamilyGroupId(req, res) {
         try {
             const { familyGroupId } = req.params;
+=======
+    // // Listar grupo familiar
+    // async listFamilyGroup(req, res) {
+    //     try {
+    //         const { familyGroupId } = req.params;
+>>>>>>> Stashed changes
 
-            if (!familyGroupId) {
-                return res.status(400).json({
-                    success: false,
-                    message: "El ID del grupo familiar es requerido"
-                });
-            }
+    //         if (!familyGroupId) {
+    //             return res.status(400).json({
+    //                 success: false,
+    //                 message: "El ID del grupo familiar es requerido"
+    //             });
+    //         }
 
-            const result = await this.affiliateService.listFamilyGroup(familyGroupId);
+    //         const result = await this.affiliateService.listFamilyGroup(familyGroupId);
 
-            if (!result) {
-                return res.status(404).json({
-                    success: false,
-                    message: "Grupo familiar no encontrado"
-                });
-            }
+    //         if (!result) {
+    //             return res.status(404).json({
+    //                 success: false,
+    //                 message: "Grupo familiar no encontrado"
+    //             });
+    //         }
 
-            return res.status(200).json({
-                success: true,
-                data: {
-                    grupo: result.grupo,
-                    afiliados: result.afiliados
-                }
-            });
-        } catch (err) {
-            console.error(err);
-            return res.status(500).json({
-                success: false,
-                message: "Error al obtener el grupo familiar",
-                error: err.message
-            });
-        }
-    }
+    //         return res.status(200).json({
+    //             success: true,
+    //             data: {
+    //                 grupo: result.grupo,
+    //                 afiliados: result.afiliados
+    //             }
+    //         });
+    //     } catch (err) {
+    //         console.error(err);
+    //         return res.status(500).json({
+    //             success: false,
+    //             message: "Error al obtener el grupo familiar",
+    //             error: err.message
+    //         });
+    //     }
+    // }
 }
 
 module.exports = AffiliateController;

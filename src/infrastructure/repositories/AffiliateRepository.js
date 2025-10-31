@@ -125,10 +125,12 @@ class AffiliateRepository {
             for (const s of situaciones) {
                 await prisma.situacionAfiliado.create({
                     data: {
-                        dniFK: afiliado.dni,
-                        idSituacionFK: s.idSituacionFK,
+                        dniFK: afiliado.dni, 
                         fechaInicio: new Date(s.fechaInicio),
-                        fechaFin: s.fechaFin ? new Date(s.fechaFin) : null
+                        fechaFin: s.fechaFin ? new Date(s.fechaFin) : null,
+                        situacionTerapeutica: {
+                            connect: { idSituacion: s.idSituacionFK } 
+                        }
                     }
                 });
             }
@@ -243,7 +245,7 @@ class AffiliateRepository {
     }
 
     // Listar grupo familiar completo
-    async listFamilyGroup(familyGroupId) {
+    async getByFamilyGroupId(familyGroupId) {
         try {
             const grupo = await prisma.grupoFamiliar.findUnique({
                 where: { idGrupoFamiliar: parseInt(familyGroupId) },

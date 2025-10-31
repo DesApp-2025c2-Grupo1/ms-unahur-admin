@@ -37,6 +37,7 @@ model Afiliado {
   fecha_alta          DateTime?
   fecha_nacimiento    DateTime?
   es_programada       Boolean        @default(false)
+  esta_activo         Boolean        @default(true)
 
   emails              AfiliadoEmail[]
   telefonos           AfiliadoTelefono[]
@@ -47,7 +48,8 @@ model AfiliadoEmail {
   id         Int      @id @default(autoincrement())
   dniFK      String   @db.VarChar(25)
   email      String   @db.VarChar(50)
-
+  esta_activo         Boolean        @default(true)
+  
   afiliado   Afiliado @relation(fields: [dniFK], references: [dni])
 
   @@unique([dniFK, email])
@@ -57,6 +59,7 @@ model AfiliadoTelefono {
   id         Int      @id @default(autoincrement())
   dniFK      String   @db.VarChar(25)
   telefono   String   @db.VarChar(25)
+  esta_activo         Boolean        @default(true)
   
   afiliado   Afiliado @relation(fields: [dniFK], references: [dni])
 
