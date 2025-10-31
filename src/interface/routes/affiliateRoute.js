@@ -1,6 +1,6 @@
 const express = require("express");
 const AffiliateRepository = require("../../infrastructure/repositories/AffiliateRepository");
-const AffiliateService = require("../../use-cases/providers/AffiliateService");
+const AffiliateService = require("../../use-cases/affiliates/AffiliateService");
 const AffiliateController = require("../controller/AffiliateController");
 const { validateAffiliate } = require("../validators/AffiliateValidator");
 const { validateFields } = require("../middleware/validationMiddleware");
