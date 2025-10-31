@@ -10,6 +10,7 @@ const therapeuticSituationRoute = require('./interface/routes/TherapeuticSituati
 const planRoute = require('./interface/routes/planRouter');
 // Providers
 const providerRoute = require('./interface/routes/providerRoute');
+const specialtyRoute = require('./interface/routes/specialtyRoute');
 
 const app = express();
 app.use(cors());
@@ -23,5 +24,7 @@ app.use(affiliateRoute);
 app.use(therapeuticSituationRoute);
 app.use(planRoute);
 app.use(providerRoute);
+// Specialty routes mounted at root (no /api prefix)
+app.use(specialtyRoute);
 
 app.listen(3000, () => console.log('Server running'));
