@@ -1,21 +1,26 @@
 const { Affiliate } = require('../entities/main')
+const EmailMapper = require('./EmailMapper');
+const PlanMapper = require('./PlanMapper');
+
+const mapper = new EmailMapper();
+const planMapper = new PlanMapper();
 
 class AffiliateMapper {
     map(data) {
         if (!data) return null;
         return new Affiliate(
             {
-                idGrupoFamiliarFK: data.idGrupoFamiliarFK,
+                grupoFamiliar: data.idGrupoFamiliarFK,
                 tipoDocumento: data.tipoDocumento,
                 apellido: data.apellido,
                 credencial: data.credencial,
                 direccion: data.direccion,
                 dni: data.dni,
-                email: data.email,
+                email: mapper.mapList(data.emails),
                 nombre: data.nombre,
                 parentesco: data.parentesco,
                 telefono: data.telefono,
-                plan: data.grupoFamiliar?.plan?.nombre
+                plan: planMapper.map(data.grupoFamiliar.plan)
             }
         );
     }

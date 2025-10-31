@@ -1,5 +1,5 @@
-const PlanService = require('../../infrastructure/services/PlanService');
-const PlanMapper = require('./mapper/response/PlanMapper')
+const PlanService = require('@services/PlanService')
+const PlanMapper = require('@mappers/PlanMapper');
 
 const service = new PlanService();
 const mapper = new PlanMapper();

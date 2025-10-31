@@ -16,6 +16,17 @@ class AffiliateController {
         }
     }
 
+    async delete(req, res) {
+        try {
+            const { dni } = req.params;
+            await service.delete(dni)
+            res.status(200).json()
+        } catch (err) {
+            console.log(err)
+            res.status(500).json(err)
+        }
+    }
+
 
 }
 
