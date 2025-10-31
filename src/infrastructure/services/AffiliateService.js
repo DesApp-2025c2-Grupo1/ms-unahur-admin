@@ -5,8 +5,12 @@ const repository = new AffiliateRepository2();
 class AffiliateService {
 
     async findAll() {
-        const affiliates = await repository.findAll();
+        const affiliates = repository.findAll();
         return affiliates;
+    }
+
+    async create(data) {
+        const { familyGroup } = data; //grupo familiar
     }
 }
 

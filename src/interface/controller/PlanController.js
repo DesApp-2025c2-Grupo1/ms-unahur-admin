@@ -1,11 +1,20 @@
+const PlanService = require('../../infrastructure/services/PlanService');
+const PlanMapper = require('./mapper/response/PlanMapper')
+
+const service = new PlanService();
+const mapper = new PlanMapper();
+
 class PlanController {
-    constructor(planService) {
-        this.planService = planService;
-    }
+
     async findAll(req, res) {
-        const plans = await this.planService.findAll()
-        res.status(200).json({ plans });
+        try {
+            const plans = service.findAll();
+            res.status(200).json({ plans: mapper.mapList(plans) })
+        } catch (err) {
+            res.status(500).json(err)
+        }
     }
+
 }
 
 module.exports = PlanController;

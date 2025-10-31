@@ -12,6 +12,14 @@ class AffiliateRepository2 {
     //obtiene el codigo del grupo familiar
     async getFamilyGroupNumber(dni) {
     }
+
+    async create() {
+
+    }
+
+    async delete(dni) {
+
+    }
 }
 
 module.exports = AffiliateRepository2;
