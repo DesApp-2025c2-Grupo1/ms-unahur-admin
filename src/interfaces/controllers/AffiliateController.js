@@ -23,13 +23,31 @@ class AffiliateController {
     async create(req, res) {
         try {
             const affiliate = req.body;
-            await this.service.create(affiliate);
+            await this.service.createAffiliate(affiliate);
             return res.status(201).json({
                 message: "Afiliado creado exitosamente"
             });
         } catch (error) {
             return res.status(404).json({
                 error: error.message || 'Error al crear el afiliado'
+            });
+        }
+    }
+
+    async update(req, res) {
+        try {
+            const { dni } = req.params;
+            const data = req.body;
+
+            // Llamar al servicio para actualizar el afiliado
+            await this.service.updateAffiliate(dni, data);
+
+            // Responder con éxito sin contenido
+            return res.status(204).send();
+        } catch (error) {
+            // Manejo de errores
+            return res.status(500).json({
+                error: error.message || 'Error al editar el afiliado'
             });
         }
     }
