@@ -1,4 +1,4 @@
-const TherapeuticSituation = require("../domain/entities/TherapeuticSituation");
+const TherapeuticSituation = require("../entities/TherapeuticSituation");
 
 class TherapeuticSituationMapper {
     map(data) {

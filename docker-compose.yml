@@ -8,19 +8,21 @@ services:
       - "5432:5432"
     environment:
       POSTGRES_DB: mediunahur_db
-      POSTGRES_USER: username
-      POSTGRES_PASSWORD: altaclave
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     volumes:
-      - local_pgdata:/var/lib/postgresql/data
+      - ./db-data/:/var/lib/postgresql/data/
   pgadmin:
     image: dpage/pgadmin4
-    container_name: pgadmin
+    container_name: pgadmin_web
     restart: always
     ports:
-      - "8888:80"
+      - "8080:80"
+    depends_on:
+      - postgres
     environment:
-      PGADMIN_DEFAULT_EMAIL: mediunahur@edu.com.ar
-      PGADMIN_DEFAULT_PASSWORD: altaclave
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: pgadminpassword
     volumes:
       - pgadmin-data:/var/lib/pgadmin
 

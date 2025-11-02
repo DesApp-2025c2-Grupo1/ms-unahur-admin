@@ -1,24 +1,21 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const swaggerUi = require('swagger-ui-express');
-const swaggerFile = require('../swagger_output.json');
+require('module-alias/register')
+const express = require("express");
 
-// Rutas
-const affiliateRoute = require('./interface/routes/affiliateRoute');
-const therapeuticSituationRoute = require('./interface/routes/TherapeuticSituationRoute');
-const planRoute = require('./interface/routes/planRouter');
+//routes
+const affiliateRoutes = require("@routes/affiliateRoutes");
+// const planRoutes = require('@routes/planRoutes');
+// const therapeuticSituationRoutes = require('@routes/therapeuticSituationRoutes')
 
 const app = express();
-app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
 
-// Swagger
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));
+app.use("/api", affiliateRoutes);
+// app.use("/api", planRoutes);
+// app.use("/api", therapeuticSituationRoutes)
 
-// Rutas
-app.use(affiliateRoute);
-app.use(therapeuticSituationRoute);
-app.use(planRoute);
+const PORT = process.env.PORT || 3000;
 
-app.listen(3000, () => console.log('Server running'));
+app.listen(PORT, () => {
+    console.log(`Server running`);
+});
+
