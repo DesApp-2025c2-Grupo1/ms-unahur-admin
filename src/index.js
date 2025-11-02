@@ -1,20 +1,21 @@
 require('module-alias/register')
-const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
+const express = require("express");
 
-
-const affiliateRoute = require('./interface/routes/affiliateRoute');
-// const therapeuticSituationRoute = require('./interface/routes/TherapeuticSituationRoute');
-// const planRoute = require('./interface/routes/planRouter');
+//routes
+const affiliateRoutes = require("@routes/affiliateRoutes");
+// const planRoutes = require('@routes/planRoutes');
+// const therapeuticSituationRoutes = require('@routes/therapeuticSituationRoutes')
 
 const app = express();
-app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
 
-// Rutas
-app.use(affiliateRoute);
-// app.use(therapeuticSituationRoute);
-// app.use(planRoute);
+app.use("/api", affiliateRoutes);
+// app.use("/api", planRoutes);
+// app.use("/api", therapeuticSituationRoutes)
 
-app.listen(3000, () => console.log('Server running'));
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+    console.log(`Server running`);
+});
+

@@ -25,21 +25,32 @@ class AffiliateRepository2 {
     async getDniOfTheFamilyGroup(groupId) {
         return prisma.afiliado.findMany({
             select: { dni: true },
-            where: groupId
+            where: { idGrupoFamiliarFK: groupId }
+        });
+    }
+
+    async create(affiliate) {
+        await prisma.afiliado.create({
+            data: affiliate
         })
     }
 
-    async create() {
-
+    async createMultipleAffiliates(affiliateList) {
+        await prisma.afiliado.createMany({
+            data: affiliateList
+        })
     }
 
-    async delete(dnis) {
+    async delete(dniList) {
         await prisma.afiliado.updateMany({
-            where: {
-                dni: { in: dnis },
-                esta_activo: true
-            },
-            data: { esta_activo: false }
+            where: { dni: { in: dniList }, esta_activo: true },
+            data: { esta_activo: false },
+        });
+    }
+
+    async getCount() {
+        return prisma.afiliado.count({
+            where: { parentesco: TITULAR }
         })
     }
 }

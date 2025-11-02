@@ -1,43 +1,75 @@
-const AffiliateRepository2 = require('../repositories/AffiliateRepository2')
-const AffiliateEmailService = require('./AffiliateEmailService')
-
-const repository = new AffiliateRepository2();
-const affiliateEmailService = new AffiliateEmailService();
-
+const AffiliateRepository = require('@repositories/AffiliateRepository2');
+const AffiliateEmailService = require('@services/AffiliateEmailService');
+const AffiliateTelephoneService = require('@services/AffiliateTelephoneService');
+const AffiliateSituationService = require('@services/AffiliateSituationService');
 
 class AffiliateService {
+    constructor(
+        repo = new AffiliateRepository(),
+        emailServ = new AffiliateEmailService(),
+        telService = new AffiliateTelephoneService(),
+        affiliateSituation = new AffiliateSituationService()
+    ) {
+        this.repo = repo;
+        this.emailServ = emailServ;
+        this.telService = telService;
+        this.affiliateSituation = affiliateSituation;
+    }
 
-    async findAll() {
-        const affiliates = await repository.findAll();
-        console.log(affiliates[0].grupoFamiliar)
-        return affiliates;
+    // Métodos principales
+    findAll() {
+        return this.repo.findAll();
+    }
+
+    async create(affiliate) {
+        const emails = this.getEmails(affiliate.emails);
+        const situations = this.getSituations(affiliate.situaciones);
+        const telephones = this.getTelephones(affiliate.telefonos);
+
+        const count = await this.repo.getCount();
+
+        console.log(count)
+        // TODO: Implementar lógica de creación
+        console.log({ emails, situations, telephones });
     }
 
     async delete(dni) {
-        //obtengo el grupo familiar
-        const groupId = await repository.getFamilyGroupNumber(dni)
+        const familyGroup = await this.repo.getFamilyGroupNumber(dni);
+        if (!familyGroup) {
+            throw new Error(`No se encontró grupo familiar para el DNI ${dni}`);
+        }
 
-        //busco los dni de los familiares
-        const dnis = (await this.getDnis(groupId)).map(d => d.dni);
-
-        console.log(dnis)
-
-        //elimino los correos de todos
-        await affiliateEmailService.delete(dnis);
-
-        await repository.delete(dnis);
-
-        //elimino las situaciones
-
-
+        const dniList = await this.getFamilyGroupDniList(familyGroup.idGrupoFamiliarFK);
+        await this.deleteAffiliateAndRelatedData(dniList);
     }
 
-    async create(data) {
-        const { familyGroup } = data; //grupo familiar
+    // Métodos auxiliares
+    async getFamilyGroupDniList(familyGroupId) {
+        const familyMembers = await this.repo.getDniOfTheFamilyGroup(familyGroupId);
+        return familyMembers.map(f => f.dni);
     }
 
-    async getDnis(groupId) {
-        return await repository.getDniOfTheFamilyGroup(groupId)
+    // Método para eliminar información relacionada
+    async deleteAffiliateAndRelatedData(dniList) {
+        await this.repo.delete(dniList);
+        await Promise.allSettled([
+            this.emailServ.delete(dniList),
+            this.telService.delete(dniList),
+            this.affiliateSituation.delete(dniList)
+        ]);
+    }
+
+    // Métodos de extracción de datos
+    getEmails(emailList) {
+        return emailList.map(e => e.email);
+    }
+
+    getTelephones(telephoneList) {
+        return telephoneList.map(t => t.telefono);
+    }
+
+    getSituations(situationList) {
+        return situationList.map(s => s);
     }
 }
 

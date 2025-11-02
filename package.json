@@ -8,7 +8,11 @@
   },
   "_moduleAliases": {
     "@services": "./src/infrastructure/services",
-    "@mappers": "./src/domain/mapper"
+    "@mappers": "./src/domain/mappers",
+    "@repositories": "./src/infrastructure/repositories",
+    "@entities": "./src/domain/entities",
+    "@controllers": "./src/interfaces/controllers",
+    "@routes": "./src/interfaces/routes"
   },
   "keywords": [],
   "author": "",

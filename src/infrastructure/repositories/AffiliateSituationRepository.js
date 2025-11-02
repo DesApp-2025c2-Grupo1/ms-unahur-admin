@@ -19,3 +19,5 @@ class AffiliateSituationRepository {
         await prisma.situacionAfiliado.deleteMany()
     }
 }
+
+module.exports = AffiliateSituationRepository;

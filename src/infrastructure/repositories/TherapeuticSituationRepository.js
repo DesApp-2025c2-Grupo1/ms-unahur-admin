@@ -14,6 +14,7 @@ class TherapeuticSituationRepository {
         });
         return situation
     }
+
 }
 
 module.exports = TherapeuticSituationRepository;
