@@ -30,16 +30,18 @@ class AffiliateService {
         // Crear titular
         const holder = await this.createHolder(affiliate);
         const baseCredencial = holder.credencial.split('-')[0];
+        const familyGroupId = holder.grupoFamiliar.idGrupoFamiliar; // 🔹 Guarda el grupo familiar del titular
 
         // Crear familiares si existen
         if (affiliate.familiares?.length > 0) {
             for (const [index, fam] of affiliate.familiares.entries()) {
-                await this.createFamilyMember(fam, baseCredencial, index, affiliate.plan);
+                await this.createFamilyMember(fam, baseCredencial, index, affiliate.plan, familyGroupId);
             }
         }
 
         return holder;
     }
+
 
     // Crear el titular
     async createHolder(holderData) {
@@ -49,33 +51,28 @@ class AffiliateService {
 
         const count = await this.repo.getCount();
         const nextFamilyNumber = count + 1;
-        const baseCredencial = nextFamilyNumber.toString().padStart(7, '0');
+        const baseCredencial = `${nextFamilyNumber.toString().padStart(7, '0')}-01`;
 
         return await this.repo.create(holderData, baseCredencial, emails, telephones, situations, holderData.plan);
     }
 
     // Crear un familiar
-    async createFamilyMember(familyData, baseCredencial, index, plan) {
+    async createFamilyMember(familyData, baseCredencial, index, plan, familyGroupId) {
         const emails = this.getEmails(familyData.emails);
         const situations = this.getSituations(familyData.situaciones);
         const telephones = this.getTelephones(familyData.telefonos);
 
-        // La credencial del familiar toma la del titular + sufijo incremental
         const credencialFamiliar = `${baseCredencial}-${(index + 2).toString().padStart(2, '0')}`;
 
-        // El plan del familiar es el mismo que el del titular
-        return await this.repo.create({ ...familyData, plan }, credencialFamiliar, emails, telephones, situations, plan);
-    }
-
-    // Editar un afiliado
-    async updateAffiliate(dni, data) {
-        // Verificar si el afiliado existe
-        if (!(await this.exists(dni))) {
-            throw new Error(`El afiliado con DNI ${dni} no existe.`);
-        }
-
-        // Actualizar el afiliado
-        await this.repo.update(dni, data);
+        return await this.repo.create(
+            { ...familyData, parentesco: familyData.parentesco || 'Familiar' },
+            credencialFamiliar,
+            emails,
+            telephones,
+            situations,
+            plan,
+            familyGroupId // 🔹 Pasa el grupo del titular
+        );
     }
 
     // Métodos de eliminación
@@ -87,6 +84,13 @@ class AffiliateService {
 
         const dniList = await this.getFamilyGroupDniList(familyGroup.idGrupoFamiliarFK);
         await this.deleteAffiliateAndRelatedData(dniList);
+    }
+
+    async getFamilyGroup(dni) {
+        const familyGroup = await this.repo.getFamilyGroupNumber(dni);
+        const familyMembers = await this.repo.getFamily(familyGroup.idGrupoFamiliarFK);
+        console.log(familyMembers)
+        return familyMembers;
     }
 
     async getFamilyGroupDniList(familyGroupId) {

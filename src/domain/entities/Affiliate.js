@@ -10,7 +10,7 @@ class Affiliate {
         email,
         nombre,
         parentesco,
-        telefono,
+        telefonos,
         plan
     }) {
         this.grupoFamiliar = grupoFamiliar,
@@ -22,7 +22,7 @@ class Affiliate {
             this.email = email,
             this.nombre = nombre,
             this.parentesco = parentesco,
-            this.telefono = telefono,
+            this.telefonos = telefonos,
             this.plan = plan,
             this.fecha_nacimiento = fecha_nacimiento
     }

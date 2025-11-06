@@ -1,5 +1,5 @@
 const express = require("express");
-const PlanController = require('../controller/PlanController');
+const PlanController = require('@controllers/PlanController');
 
 const controller = new PlanController();
 const router = express.Router();

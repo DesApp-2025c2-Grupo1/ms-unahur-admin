@@ -55,11 +55,25 @@ class AffiliateController {
     async delete(req, res) {
         try {
             const { dni } = req.params;
-            await this.service.d(dni);
+            await this.service.delete(dni);
             return res.status(204).send();
         } catch (error) {
             return res.status(500).json({
                 error: error.message || 'Error al eliminar el afiliado'
+            });
+        }
+    }
+
+    async getFamilyGroup(req, res) {
+        try {
+            const { dni } = req.params;
+            const familyGroup = await this.service.getFamilyGroup(dni);
+            return res.status(200).json({
+                affiliates: this.mapper.mapList(familyGroup)
+            });
+        } catch (error) {
+            return res.status(500).json({
+                error: error.message || 'Error al obtener el grupo familiar'
             });
         }
     }
