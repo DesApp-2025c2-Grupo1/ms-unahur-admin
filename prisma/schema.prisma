@@ -83,3 +83,93 @@ model SituacionTerapeutica {
 
   situacionesAfiliados SituacionAfiliado[]
 }
+
+enum TipoPrestador {
+  profesional
+  centro_medico
+}
+
+enum DiaSemana {
+  Lunes
+  Martes
+  Miercoles
+  Jueves
+  Viernes
+  Sabado
+  Domingo
+}
+
+model Prestador {
+  cuitCuil        String                 @id @db.VarChar(25)
+  nombreCompleto  String                 @db.VarChar(100)
+  tipoPrestador   TipoPrestador
+  centroMedicoId  String?                @db.VarChar(25)
+  centroMedico    Prestador?             @relation("CentroMedicoRelation", fields: [centroMedicoId], references: [cuitCuil])
+  profesionales   Prestador[]            @relation("CentroMedicoRelation")
+  idLugarFK       Int?
+  lugarAtencion   LugarAtencion?         @relation(fields: [idLugarFK], references: [idLugar])
+  telefonos       TelefonoPrestador[]
+  mails           MailPrestador[]
+  especialidades  PrestadorEspecialidad[]
+  agendas         Agenda[]
+}
+
+model LugarAtencion {
+  idLugar       Int                @id @default(autoincrement())
+  direccion     String             @db.VarChar(100)
+  localidad     String             @db.VarChar(50)
+  codigoPostal  String             @db.VarChar(15)
+  provincia     String             @db.VarChar(50)
+  prestadores   Prestador[]
+  horarios      HorarioAtencion[]
+}
+
+model TelefonoPrestador {
+  idTelefono   Int             @id @default(autoincrement())
+  cuitCuilFK   String          @db.VarChar(25)
+  telefono     String          @db.VarChar(25)
+  prestador    Prestador       @relation(fields: [cuitCuilFK], references: [cuitCuil])
+}
+
+model MailPrestador {
+  idMail       Int             @id @default(autoincrement())
+  cuitCuilFK   String          @db.VarChar(25)
+  mail         String          @db.VarChar(50)
+  prestador    Prestador       @relation(fields: [cuitCuilFK], references: [cuitCuil])
+}
+
+model Especialidad {
+  idEspecialidad  Int                   @id @default(autoincrement())
+  nombre          String                @db.VarChar(100)
+  prestadores     PrestadorEspecialidad[]
+  agendas         Agenda[]
+}
+
+model PrestadorEspecialidad {
+  id               Int                  @id @default(autoincrement())
+  cuitCuilFK       String               @db.VarChar(25)
+  idEspecialidadFK Int
+  prestador        Prestador            @relation(fields: [cuitCuilFK], references: [cuitCuil])
+  especialidad     Especialidad         @relation(fields: [idEspecialidadFK], references: [idEspecialidad])
+  @@unique([cuitCuilFK, idEspecialidadFK])
+}
+
+model HorarioAtencion {
+  idHorario     Int                   @id @default(autoincrement())
+  idLugarFK     Int
+  diaSemana     DiaSemana
+  horaDesde     String                @db.VarChar(5)
+  horaHasta     String                @db.VarChar(5)
+  lugar         LugarAtencion         @relation(fields: [idLugarFK], references: [idLugar])
+}
+
+model Agenda {
+  idAgenda         Int                @id @default(autoincrement())
+  cuitCuilFK       String             @db.VarChar(25)
+  idEspecialidadFK Int
+  fechaInicio      DateTime
+  fechaFin         DateTime?
+  duracionTurno    Int
+  prestador        Prestador          @relation(fields: [cuitCuilFK], references: [cuitCuil])
+  especialidad     Especialidad       @relation(fields: [idEspecialidadFK], references: [idEspecialidad])
+}
