@@ -1,11 +1,11 @@
 const PlanService = require('@services/PlanService')
 const PlanMapper = require('@mappers/PlanMapper');
 
-const service = new PlanService();
-const mapper = new PlanMapper();
-
 class PlanController {
-
+    constructor(service = new PlanService(), mapper = new PlanMapper()) {
+        this.service = service;
+        this.mapper = mapper;
+    }
     async findAll(req, res) {
         try {
             const plans = service.findAll();

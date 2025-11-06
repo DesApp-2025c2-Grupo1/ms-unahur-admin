@@ -10,6 +10,9 @@ class AffiliateRepository2 {
             include: {
                 emails: true, grupoFamiliar: {
                     select: { plan: true }
+                },
+                telefonos: {
+                    select: { telefono: true }
                 }
             }
         });
@@ -22,6 +25,20 @@ class AffiliateRepository2 {
         })
     }
 
+    async getFamily(groupId) {
+        return prisma.afiliado.findMany({
+            where: { idGrupoFamiliarFK: groupId },
+            include: {
+                emails: true, grupoFamiliar: {
+                    select: { plan: true }
+                },
+                telefonos: {
+                    select: { telefono: true }
+                }
+            }
+        });
+    }
+
     async getDniOfTheFamilyGroup(groupId) {
         return prisma.afiliado.findMany({
             select: { dni: true },
@@ -29,7 +46,15 @@ class AffiliateRepository2 {
         });
     }
 
-    async create(affiliate, credential, emails, telephones, situations, plan) {
+    async create(affiliate, credential, emails, telephones, situations, plan, familyGroupId = null) {
+        // Función inline para parsear fechas
+        const parseDate = (dateStr) => {
+            if (!dateStr) return null;
+            if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return new Date(dateStr); // ISO
+            const [day, month, year] = dateStr.split('/');
+            return new Date(`${year}-${month}-${day}`); // DD/MM/YYYY -> YYYY-MM-DD
+        };
+
         return await prisma.afiliado.create({
             data: {
                 dni: affiliate.dni,
@@ -39,12 +64,10 @@ class AffiliateRepository2 {
                 parentesco: affiliate.parentesco || 'Titular',
                 direccion: affiliate.direccion,
                 tipoDocumento: 'DNI',
-                grupoFamiliar: {
-                    create: {
-                        idPlanFK: plan,
-                        nroAfiliado: affiliate.baseCredencial
-                    }
-                },
+                fecha_nacimiento: parseDate(affiliate.fecha_nacimiento), // 🔹 parsea directamente aquí
+                grupoFamiliar: familyGroupId
+                    ? { connect: { idGrupoFamiliar: familyGroupId } }
+                    : { create: { idPlanFK: plan, nroAfiliado: credential } },
                 emails: emails?.length
                     ? { create: emails.map(e => ({ email: e })) }
                     : undefined,
@@ -55,8 +78,8 @@ class AffiliateRepository2 {
                     ? {
                         create: situations.map(s => ({
                             idSituacionFK: s.id,
-                            fechaInicio: new Date(s.fecha_inicio),
-                            fechaFin: s.fecha_fin ? new Date(s.fecha_fin) : null
+                            fechaInicio: parseDate(s.fecha_inicio),
+                            fechaFin: s.fecha_fin ? parseDate(s.fecha_fin) : null
                         }))
                     }
                     : undefined
@@ -69,6 +92,7 @@ class AffiliateRepository2 {
             }
         });
     }
+
 
     async exists(dni) {
         return await prisma.afiliado.findUnique({
@@ -102,6 +126,16 @@ class AffiliateRepository2 {
     }
 
     async getCount() {
+        return prisma.afiliado.count({
+            where: {
+                parentesco: TITULAR,
+                esta_activo: true,
+            }
+        })
+    }
+
+    //Metodo que traiga la cantidad de familiares de un grupo
+    async getCountFamilyMembers(dni) {
         return prisma.afiliado.count({
             where: {
                 parentesco: TITULAR,
