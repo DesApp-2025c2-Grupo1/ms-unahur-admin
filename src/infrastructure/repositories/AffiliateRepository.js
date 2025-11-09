@@ -62,7 +62,7 @@ class AffiliateRepository2 {
                 apellido: affiliate.apellido,
                 credencial: `${credential}`,
                 parentesco: affiliate.parentesco || 'Titular',
-                direccion: affiliate.direccion,
+                direccion: affiliate.direccion || 'N/A',
                 tipoDocumento: 'DNI',
                 fecha_nacimiento: parseDate(affiliate.fecha_nacimiento), // 🔹 parsea directamente aquí
                 grupoFamiliar: familyGroupId

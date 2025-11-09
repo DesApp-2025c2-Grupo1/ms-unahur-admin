@@ -21,7 +21,15 @@ class ProviderService {
 
     async update(cuitCuil, payload) {
         // Could validate conflicts (e.g., changing cuit to existing) here
-        return await this.providerRepository.updateByCuitCuil(cuitCuil, payload);
+        console.log(`[ProviderService.update] Iniciando actualización para CUIT ${cuitCuil}`);
+        try {
+            const result = await this.providerRepository.updateByCuitCuil(cuitCuil, payload);
+            console.log(`[ProviderService.update] ✅ Actualización completada`);
+            return result;
+        } catch (error) {
+            console.error(`[ProviderService.update] ❌ Error en servicio:`, error.message);
+            throw error;
+        }
     }
 
     async delete(cuitCuil) {

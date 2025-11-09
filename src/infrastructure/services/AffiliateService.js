@@ -53,6 +53,7 @@ class AffiliateService {
         const nextFamilyNumber = count + 1;
         const baseCredencial = `${nextFamilyNumber.toString().padStart(7, '0')}-01`;
 
+        console.log('🔍 DEBUG createHolder:', { plan: holderData.plan, planType: typeof holderData.plan, situaciones: situations });
         return await this.repo.create(holderData, baseCredencial, emails, telephones, situations, holderData.plan);
     }
 
