@@ -1,19 +1,23 @@
 const TherapeuticSituationMapper = require('./TherapeuticSituationMapper');
 
 class SituacionAfiliadoMapper {
-    constructor() {
-        this.tMapper = new TherapeuticSituationMapper();
+    constructor(mapper = new TherapeuticSituationMapper()) {
+        this.mapper = mapper;
     }
 
     map(data) {
         if (!data) return null;
-
         return {
             idSituacionAfiliado: data.idSituacionAfiliado,
             fechaInicio: data.fechaInicio,
             fechaFin: data.fechaFin,
-            situacion: this.tMapper.map(data.situacionTerapeutica)
+            situacionTerapeutica: this.mapper.map(data.situacionTerapeutica) 
         };
+    }
+
+    mapList(data) {
+        if (!Array.isArray(data)) return [];
+        return data.map(x => this.map(x));
     }
 }
 

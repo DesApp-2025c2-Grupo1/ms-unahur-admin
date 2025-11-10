@@ -29,6 +29,7 @@
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "express-validator": "^7.3.0",
-    "module-alias": "^2.2.3"
+    "module-alias": "^2.2.3",
+    "node-schedule": "^2.1.1"
   }
 }

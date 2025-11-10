@@ -7,5 +7,10 @@ class AffiliateEmailService {
     async delete(dnis) {
         await this.repo.delete(dnis);
     }
+    async deleteEmail(dni, email) {
+        console.log(dni)
+        console.log(email)
+        await this.repo.deleteEmail(dni, email);
+    }
 }
 module.exports = AffiliateEmailService;
