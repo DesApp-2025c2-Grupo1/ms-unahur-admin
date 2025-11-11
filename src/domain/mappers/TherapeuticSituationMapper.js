@@ -9,6 +9,10 @@ class TherapeuticSituationMapper {
             nombre: data.nombre
         });
     }
+    mapList(data) {
+        if (!Array.isArray(data)) return [];
+        return data.map(x => this.map(x));
+    }
 }
 
 module.exports = TherapeuticSituationMapper;

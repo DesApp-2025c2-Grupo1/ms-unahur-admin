@@ -20,6 +20,20 @@ class AffiliateController {
         }
     }
 
+    async getAffiliateByDni(req, res) {
+        try {
+            const { dni } = req.params;
+            const affiliate = await this.service.getAffiliateByDni(dni);
+            return res.status(200).json({
+                affiliates: this.mapper.map(affiliate)
+            });
+        } catch (error) {
+            return res.status(500).json({
+                error: error.message || 'Error interno del servidor'
+            });
+        }
+    }
+
     async create(req, res) {
         try {
             const affiliate = req.body;
@@ -38,7 +52,6 @@ class AffiliateController {
         try {
             const { dni } = req.params;
             const data = req.body;
-
             // Llamar al servicio para actualizar el afiliado
             await this.service.updateAffiliate(dni, data);
 
@@ -56,6 +69,32 @@ class AffiliateController {
         try {
             const { dni } = req.params;
             await this.service.delete(dni);
+            return res.status(204).send();
+        } catch (error) {
+            return res.status(500).json({
+                error: error.message || 'Error al eliminar el afiliado'
+            });
+        }
+    }
+
+    async deleteEmail(req, res) {
+        try {
+            const { dni } = req.params;
+            const { email } = req.body;
+            await this.service.deleteEmail(dni, email);
+            return res.status(204).send();
+        } catch (error) {
+            return res.status(500).json({
+                error: error.message || 'Error al eliminar el afiliado'
+            });
+        }
+    }
+
+    async deleteTelephone(req, res) {
+        try {
+            const { dni } = req.params;
+            const { telephone } = req.body;
+            await this.service.deleteTelephone(dni, telephone);
             return res.status(204).send();
         } catch (error) {
             return res.status(500).json({

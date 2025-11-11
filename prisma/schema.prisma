@@ -34,10 +34,10 @@ model Afiliado {
   credencial          String         @db.VarChar(25)
   direccion           String         @db.VarChar(50)
   tipoDocumento       String         @db.VarChar(5)
-  fecha_alta          DateTime?
   fecha_nacimiento    DateTime?
-  es_programada       Boolean        @default(false)
+  fecha_alta          DateTime?
   esta_activo         Boolean        @default(true)
+  es_programada       Boolean        @default(false)
 
   emails              AfiliadoEmail[]
   telefonos           AfiliadoTelefono[]

@@ -42,10 +42,12 @@ class ProviderController {
         try {
             const { cuit } = req.params;
             const payload = req.body;
+            console.log(`[ProviderController.update] Actualizando prestador ${cuit}:`, JSON.stringify(payload, null, 2));
             const updated = await this.service.update(cuit, payload);
+            console.log(`[ProviderController.update] ✅ Prestador actualizado:`, updated);
             return res.status(200).json(updated);
         } catch (error) {
-            console.error('ProviderController.update error:', error);
+            console.error(`[ProviderController.update] ❌ Error:`, error.message, error);
             return res.status(400).json({ error: error.message });
         }
     }
