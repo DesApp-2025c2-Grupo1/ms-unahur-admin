@@ -49,21 +49,29 @@ class AffiliateController {
     }
 
     async update(req, res) {
-        try {
-            const { dni } = req.params;
-            const data = req.body;
-            // Llamar al servicio para actualizar el afiliado
-            await this.service.updateAffiliate(dni, data);
-
-            // Responder con éxito sin contenido
-            return res.status(204).send();
-        } catch (error) {
-            // Manejo de errores
-            return res.status(500).json({
-                error: error.message || 'Error al editar el afiliado'
-            });
-        }
+    try {
+        const { dni } = req.params;
+        const data = req.body;
+        
+        console.log("Controller - DNI:", dni);
+        console.log("Controller - Datos recibidos:", JSON.stringify(data, null, 2));
+        
+        const updated = await this.service.updateAffiliate(dni, data);
+        
+        console.log("Controller - Actualización exitosa");
+        
+        return res.status(200).json({
+            affiliate: this.mapper.map(updated)
+        });
+    } catch (error) {
+        console.error("Controller - Error:", error);
+        return res.status(500).json({
+            error: error.message || 'Error al editar el afiliado'
+        });
     }
+}
+
+
 
     async delete(req, res) {
         try {
@@ -113,6 +121,23 @@ class AffiliateController {
         } catch (error) {
             return res.status(500).json({
                 error: error.message || 'Error al obtener el grupo familiar'
+            });
+        }
+    }
+
+    async updatePlan(req, res) {
+        try {
+            const { dni } = req.params;
+            const { idPlan } = req.body;
+
+            await this.service.updateAffiliatePlan(dni, idPlan);
+
+            return res.status(200).json({
+                message: "Plan actualizado correctamente"
+            });
+        } catch (error) {
+            return res.status(500).json({
+                error: error.message || 'Error al actualizar el plan'
             });
         }
     }

@@ -1,4 +1,4 @@
-const PlanService = require('@services/PlanService')
+const PlanService = require('@services/PlanService');
 const PlanMapper = require('@mappers/PlanMapper');
 
 class PlanController {
@@ -6,15 +6,15 @@ class PlanController {
         this.service = service;
         this.mapper = mapper;
     }
+
     async findAll(req, res) {
         try {
-            const plans = service.findAll();
-            res.status(200).json({ plans: mapper.mapList(plans) })
+            const plans = await this.service.findAll();
+            res.status(200).json({ plans: this.mapper.mapList(plans) });
         } catch (err) {
-            res.status(500).json(err)
+            res.status(500).json({ error: err.message });
         }
     }
-
 }
 
 module.exports = PlanController;
