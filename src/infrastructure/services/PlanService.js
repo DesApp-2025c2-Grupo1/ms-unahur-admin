@@ -1,13 +1,13 @@
-const PlanRepository = require('../repositories/PlanRepository');
-const repository = new PlanRepository()
+const PlanRepository = require('@repositories/PlanRepository');
 
 class PlanService {
-
-    async findAll() {
-        const plans = repository.findAll();
-        return plans
+    constructor(repo = new PlanRepository()) {
+        this.repo = repo;
     }
 
+    async findAll() {
+        return await this.repo.findAll();
+    }
 }
 
 module.exports = PlanService;

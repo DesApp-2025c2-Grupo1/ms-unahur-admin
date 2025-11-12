@@ -36,7 +36,7 @@ class AffiliateService {
         // Crear titular
         const holder = await this.createHolder(affiliate);
         const baseCredencial = holder.credencial.split('-')[0];
-        const familyGroupId = holder.grupoFamiliar.idGrupoFamiliar; // 🔹 Guarda el grupo familiar del titular
+        const familyGroupId = holder.grupoFamiliar.idGrupoFamiliar; // Guarda el grupo familiar del titular
         const dateHigh = holder.fecha_alta;
 
         // Crear familiares si existen
@@ -50,12 +50,20 @@ class AffiliateService {
     }
 
     // Modificar afiliado
-    async updateAffiliate(dni,data) {
-        // console.log(data.telefonos),
-        // console.log(data.emails),
-        // console.log(data.situaciones)
-        await this.repo.update(dni,data)
-    }
+    async updateAffiliate(dni, data) {
+    console.log("🔧 Service - Datos que llegan:", {
+        dni,
+        situaciones: data.situaciones,
+        situacionesEliminadas: data.situacionesEliminadas
+    });
+    
+    const updated = await this.repo.update(dni, data);
+    
+    console.log("Service - Actualización completada");
+    return updated;
+}
+
+
 
     // Crear el titular
     async createHolder(holderData) {

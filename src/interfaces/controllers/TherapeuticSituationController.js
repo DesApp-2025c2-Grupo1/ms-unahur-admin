@@ -1,5 +1,7 @@
+const TherapeuticSituationService = require('@services/TherapeuticSituationService');
+
 class TherapeuticSituationController {
-    constructor(service) {
+    constructor(service = new TherapeuticSituationService()) {
         this.service = service;
     }
 

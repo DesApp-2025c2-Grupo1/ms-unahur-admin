@@ -1,12 +1,12 @@
 const { Affiliate } = require('../entities/main');
 const EmailMapper = require('./EmailMapper');
 const PlanMapper = require('./PlanMapper');
-const Telephone = require('./TelephoneMapper');
-const SituacionAfiliadoMapper = require('./SituacionAfiliadoMapper')
+const TelephoneMapper = require('./TelephoneMapper');
+const SituacionAfiliadoMapper = require('./SituacionAfiliadoMapper');
 
-const mapper = new EmailMapper();
+const emailMapper = new EmailMapper();
 const planMapper = new PlanMapper();
-const telephoneMapper = new Telephone();
+const telephoneMapper = new TelephoneMapper();
 const situacionAfiliadoMapper = new SituacionAfiliadoMapper();
 
 class AffiliateMapper {
@@ -21,7 +21,7 @@ class AffiliateMapper {
 
     map(data) {
         if (!data) return null;
-        console.log(data.situaciones)
+        
         return new Affiliate({
             grupoFamiliar: data.idGrupoFamiliarFK,
             tipoDocumento: data.tipoDocumento,
@@ -29,7 +29,7 @@ class AffiliateMapper {
             credencial: data.credencial,
             direccion: data.direccion,
             dni: data.dni,
-            email: mapper.mapList(data.emails),
+            email: emailMapper.mapList(data.emails),
             nombre: data.nombre,
             fecha_nacimiento: this.formatDate(data.fecha_nacimiento),
             parentesco: data.parentesco,

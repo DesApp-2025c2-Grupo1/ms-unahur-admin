@@ -72,6 +72,7 @@ model SituacionAfiliado {
   dniFK               String    @db.VarChar(25)
   fechaInicio         DateTime
   fechaFin            DateTime?
+  esta_activo         Boolean   @default(true)
 
   situacionTerapeutica SituacionTerapeutica @relation(fields: [idSituacionFK], references: [idSituacion])
   afiliado             Afiliado             @relation(fields: [dniFK], references: [dni])
