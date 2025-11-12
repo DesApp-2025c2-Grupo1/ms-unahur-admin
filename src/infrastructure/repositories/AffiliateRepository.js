@@ -8,16 +8,45 @@ class AffiliateRepository2 {
         return prisma.afiliado.findMany({
             where: { parentesco: TITULAR, esta_activo: true },
             include: {
-                emails: true, grupoFamiliar: {
-                    select: { plan: true }
+                emails: {
+                    where: { esta_activo: true },
                 },
+                grupoFamiliar: { select: { plan: true } },
                 telefonos: {
-                    select: { telefono: true }
+                    where: { esta_activo: true }
                 }
             }
         });
     }
-    //obtiene el codigo del grupo familiar
+
+    async getAffiliateByDni(dni) {
+        return prisma.afiliado.findFirst({
+            where: {
+                dni,
+                parentesco: TITULAR,
+                esta_activo: true,
+            },
+            include: {
+                situaciones: {
+                    where: { dniFK: dni },
+                    include: {
+                        situacionTerapeutica: true, 
+                    },
+                },
+                emails: {
+                    where: { esta_activo: true },
+                },
+                grupoFamiliar: {
+                    select: { plan: true },
+                },
+                telefonos: {
+                    where: { esta_activo: true },
+                },
+            },
+        });
+    }
+
+    // obtiene el codigo del grupo familiar (retorna el id o null)
     async getFamilyGroupNumber(dni) {
         return prisma.afiliado.findFirst({
             select: { idGrupoFamiliarFK: true },
@@ -29,13 +58,16 @@ class AffiliateRepository2 {
         return prisma.afiliado.findMany({
             where: { idGrupoFamiliarFK: groupId },
             include: {
-                emails: true, grupoFamiliar: {
-                    select: { plan: true }
+                emails: {
+                    where: { esta_activo: true },
+                },
+                grupoFamiliar: {
+                    select: { plan: true },
                 },
                 telefonos: {
-                    select: { telefono: true }
-                }
-            }
+                    where: { esta_activo: true }
+                },
+            },
         });
     }
 
@@ -46,40 +78,80 @@ class AffiliateRepository2 {
         });
     }
 
-    async create(affiliate, credential, emails, telephones, situations, plan, familyGroupId = null) {
-        // Función inline para parsear fechas
-        const parseDate = (dateStr) => {
-            if (!dateStr) return null;
-            if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return new Date(dateStr); // ISO
-            const [day, month, year] = dateStr.split('/');
-            return new Date(`${year}-${month}-${day}`); // DD/MM/YYYY -> YYYY-MM-DD
-        };
 
-        return await prisma.afiliado.create({
+    parseDate = (date) => {
+        if (!date) return null;
+        if (date instanceof Date) return date;
+        if (/^\d{4}-\d{2}-\d{2}$/.test(date)) return new Date(date); // ISO
+        const parts = date.split('/');
+        if (parts.length === 3) {
+            const [day, month, year] = parts;
+            return new Date(`${year}-${month}-${day}`);
+        }
+        return new Date(date);
+    };
+
+    async create(affiliate, credential, emails, telephones, situations, plan, familyGroupId = null, fechaAlta = null) {
+        if (fechaAlta) {
+            return prisma.afiliado.create({
+                data: {
+                    dni: affiliate.dni,
+                    nombre: affiliate.nombre,
+                    apellido: affiliate.apellido,
+                    credencial: `${credential}`,
+                    parentesco: affiliate.parentesco || TITULAR,
+                    direccion: affiliate.direccion || 'N/A',
+                    es_programada: true,
+                    fecha_alta: this.parseDate(fechaAlta),
+                    tipoDocumento: 'DNI',
+                    esta_activo: false,
+                    fecha_nacimiento: this.parseDate(affiliate.fecha_nacimiento),
+                    grupoFamiliar: familyGroupId
+                        ? { connect: { idGrupoFamiliar: familyGroupId } }
+                        : { create: { idPlanFK: plan, nroAfiliado: credential } },
+                    emails: emails?.length ? { create: emails.map(e => ({ email: e })) } : undefined,
+                    telefonos: telephones?.length ? { create: telephones.map(t => ({ telefono: t })) } : undefined,
+                    situaciones: situations?.length
+                        ? {
+                            create: situations.map(s => ({
+                                idSituacionFK: s.id,
+                                fechaInicio: this.parseDate(s.fecha_inicio),
+                                fechaFin: s.fecha_fin ? this.parseDate(s.fecha_fin) : null
+                            }))
+                        }
+                        : undefined
+                },
+                include: {
+                    grupoFamiliar: true,
+                    emails: true,
+                    telefonos: true,
+                    situaciones: true
+                }
+            })
+        }
+        return prisma.afiliado.create({
             data: {
                 dni: affiliate.dni,
                 nombre: affiliate.nombre,
                 apellido: affiliate.apellido,
                 credencial: `${credential}`,
-                parentesco: affiliate.parentesco || 'Titular',
-                direccion: affiliate.direccion,
+                parentesco: affiliate.parentesco || TITULAR,
+                direccion: affiliate.direccion || 'N/A',
                 tipoDocumento: 'DNI',
-                fecha_nacimiento: parseDate(affiliate.fecha_nacimiento), // 🔹 parsea directamente aquí
+                emails: emails?.length ? { create: emails.map(e => ({ email: e })) } : undefined,
+                telefonos: telephones?.length ? { create: telephones.map(t => ({ telefono: t })) } : undefined,
+                fecha_nacimiento: this.parseDate(affiliate.fecha_nacimiento),
                 grupoFamiliar: familyGroupId
                     ? { connect: { idGrupoFamiliar: familyGroupId } }
                     : { create: { idPlanFK: plan, nroAfiliado: credential } },
-                emails: emails?.length
-                    ? { create: emails.map(e => ({ email: e })) }
-                    : undefined,
-                telefonos: telephones?.length
-                    ? { create: telephones.map(t => ({ telefono: t })) }
-                    : undefined,
+                emails: emails?.length ? { create: emails.map(e => ({ email: e })) } : undefined,
+                telefonos: telephones?.length ? { create: telephones.map(t => ({ telefono: t })) } : undefined,
                 situaciones: situations?.length
                     ? {
                         create: situations.map(s => ({
                             idSituacionFK: s.id,
-                            fechaInicio: parseDate(s.fecha_inicio),
-                            fechaFin: s.fecha_fin ? parseDate(s.fecha_fin) : null
+                            fechaInicio: this.parseDate(s.fecha_inicio),
+                            fechaFin: s.fecha_fin ? this.parseDate(s.fecha_fin) : null
                         }))
                     }
                     : undefined
@@ -93,35 +165,68 @@ class AffiliateRepository2 {
         });
     }
 
-
     async exists(dni) {
-        return await prisma.afiliado.findUnique({
-            where: { dni: dni }
-        })
+        return prisma.afiliado.findUnique({
+            where: { dni }
+        });
     }
 
     async createMultipleAffiliates(affiliateList) {
-        await prisma.afiliado.createMany({
+        return prisma.afiliado.createMany({
             data: affiliateList
-        })
+        });
     }
 
     async delete(dniList) {
-        await prisma.afiliado.updateMany({
+        return prisma.afiliado.updateMany({
             where: { dni: { in: dniList }, esta_activo: true },
-            data: { esta_activo: false },
+            data: { esta_activo: false }
         });
     }
 
     async update(dni, data) {
-        await prisma.afiliado.update({
-            where: {
-                dni: dni
-            },
+        console.log(data.telefonos);
+
+        return prisma.afiliado.update({
+            where: { dni },
             data: {
-                dni: data.new_dni,
-                nombre: data.nombre
-            }
+                nombre: data.nombre,
+                apellido: data.apellido,
+                fecha_nacimiento: data.fecha_nacimiento,
+
+                // 🔹 Actualiza teléfonos
+                telefonos: data.telefonos?.length
+                    ? {
+                        update: data.telefonos.map(t => ({
+                            where: { id: t.idTelefono },
+                            data: { telefono: t.nuevo_telefono },
+                        })),
+                    }
+                    : undefined,
+
+                // 🔹 Actualiza emails
+                emails: data.emails?.length
+                    ? {
+                        update: data.emails.map(e => ({
+                            where: { id: e.idEmail },
+                            data: { email: e.nuevo_email ?? e.email },
+                        })),
+                    }
+                    : undefined,
+
+                // 🔹 Actualiza situaciones
+                situaciones: data.situaciones?.length
+                    ? {
+                        update: data.situaciones.map(s => ({
+                            where: { idSituacionFK: s.idSituacion },
+                            data: {
+                                fechaInicio: this.parseDate(s.fecha_inicio),
+                                fechaFin: s.fecha_fin ? this.parseDate(s.fecha_fin) : null
+                            },
+                        })),
+                    }
+                    : undefined,
+            },
         });
     }
 
@@ -129,80 +234,43 @@ class AffiliateRepository2 {
         return prisma.afiliado.count({
             where: {
                 parentesco: TITULAR,
-                esta_activo: true,
+                esta_activo: true
             }
-        })
+        });
     }
 
-    //Metodo que traiga la cantidad de familiares de un grupo
+    async updateAffiliatesPendingRegistration(dnis) {
+        return prisma.afiliado.updateMany({
+            where: { dni: { in: dnis } },
+            data: {
+                esta_activo: true,
+                es_programada: false
+            }
+        });
+    }
+
+    // Metodo que trae la cantidad de familiares de un grupo a partir del dni del titular
     async getCountFamilyMembers(dni) {
+        const groupId = await this.getFamilyGroupNumber(dni);
+        if (!groupId) return 0;
         return prisma.afiliado.count({
             where: {
-                parentesco: TITULAR,
-                esta_activo: true,
+                idGrupoFamiliarFK: groupId,
+                esta_activo: true
             }
-        })
+        });
     }
 
-    //TODO 
-    //     async getTherapeuticSituationsByDni(dni) {
-    //     try {
-    //         const situaciones = await prisma.situacionAfiliado.findMany({
-    //             where: { dniFK: dni },
-    //             include: { situacionTerapeutica: true },
-    //             orderBy: { fechaInicio: 'desc' }
-    //         });
-
-    //         return situaciones.map(s => situacionMapper.map(s));
-    //     } catch (error) {
-    //         throw new Error("No se pudieron obtener las situaciones terapéuticas")
-    //     }
-    // }
-
-    // async existFamilyGroup(familyGroupId) {
-    //     try {
-    //         const grupo = await prisma.grupoFamiliar.findUnique({
-    //             where: { idGrupoFamiliar: parseInt(familyGroupId) }
-    //         })
-    //         return grupo !== null
-    //     } catch (error) {
-    //         throw new Error("No se pudo verificar la existencia del grupo familiar")
-    //     }
-    // }
-
-    // // Listar grupo familiar completo
-    // async getByFamilyGroupId(familyGroupId) {
-    //     try {
-    //         const grupo = await prisma.grupoFamiliar.findUnique({
-    //             where: { idGrupoFamiliar: parseInt(familyGroupId) },
-    //             include: { plan: true }
-    //         });
-
-    //         if (!grupo) return null;
-
-    //         const miembros = await prisma.afiliado.findMany({
-    //             where: { idGrupoFamiliarFK: parseInt(familyGroupId) }
-    //         });
-
-    //         const afiliadosMapeados = miembros.map(m => mapper.map(m));
-
-    //         return { grupo, afiliados: afiliadosMapeados };
-    //     } catch (error) {
-    //         throw new Error('No se pudieron obtener los miembros del grupo familiar');
-    //     }
-    // }
-
-    // // Verificar existencia de grupo familiar
-    // async existFamilyGroup(familyGroupId) {
-    //     try {
-    //         const grupo = await prisma.grupoFamiliar.findUnique({
-    //             where: { idGrupoFamiliar: parseInt(familyGroupId) }
-    //         });
-    //         return grupo !== null;
-    //     } catch (error) {
-    //         throw new Error('No se pudo verificar la existencia del grupo familiar');
-    //     }
-    // }
+    //Metodo para obtener los afiliados pendientes de alta (solo dni)
+    async getAffiliatePendingRegistration() {
+        return prisma.afiliado.findMany({
+            select: { dni: true, fecha_alta: true },
+            where: {
+                esta_activo: false,
+                es_programada: true
+            }
+        });
+    }
 }
 
 module.exports = AffiliateRepository2;

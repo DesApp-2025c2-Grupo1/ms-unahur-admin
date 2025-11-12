@@ -2,10 +2,12 @@ const { Affiliate } = require('../entities/main');
 const EmailMapper = require('./EmailMapper');
 const PlanMapper = require('./PlanMapper');
 const Telephone = require('./TelephoneMapper');
+const SituacionAfiliadoMapper = require('./SituacionAfiliadoMapper')
 
 const mapper = new EmailMapper();
 const planMapper = new PlanMapper();
 const telephoneMapper = new Telephone();
+const situacionAfiliadoMapper = new SituacionAfiliadoMapper();
 
 class AffiliateMapper {
     formatDate(date) {
@@ -19,6 +21,7 @@ class AffiliateMapper {
 
     map(data) {
         if (!data) return null;
+        console.log(data.situaciones)
         return new Affiliate({
             grupoFamiliar: data.idGrupoFamiliarFK,
             tipoDocumento: data.tipoDocumento,
@@ -31,7 +34,8 @@ class AffiliateMapper {
             fecha_nacimiento: this.formatDate(data.fecha_nacimiento),
             parentesco: data.parentesco,
             telefonos: telephoneMapper.mapList(data.telefonos),
-            plan: planMapper.map(data.grupoFamiliar?.plan)
+            plan: planMapper.map(data.grupoFamiliar?.plan),
+            situaciones: situacionAfiliadoMapper.mapList(data.situaciones)
         });
     }
 

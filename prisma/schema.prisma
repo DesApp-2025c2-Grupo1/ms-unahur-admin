@@ -34,10 +34,10 @@ model Afiliado {
   credencial          String         @db.VarChar(25)
   direccion           String         @db.VarChar(50)
   tipoDocumento       String         @db.VarChar(5)
-  fecha_alta          DateTime?
   fecha_nacimiento    DateTime?
-  es_programada       Boolean        @default(false)
+  fecha_alta          DateTime?
   esta_activo         Boolean        @default(true)
+  es_programada       Boolean        @default(false)
 
   emails              AfiliadoEmail[]
   telefonos           AfiliadoTelefono[]
@@ -106,8 +106,7 @@ model Prestador {
   centroMedicoId  String?                @db.VarChar(25)
   centroMedico    Prestador?             @relation("CentroMedicoRelation", fields: [centroMedicoId], references: [cuitCuil])
   profesionales   Prestador[]            @relation("CentroMedicoRelation")
-  idLugarFK       Int?
-  lugarAtencion   LugarAtencion?         @relation(fields: [idLugarFK], references: [idLugar])
+  lugaresAtencion LugarAtencion[]        // Relación One-to-Many: un prestador, muchos lugares
   telefonos       TelefonoPrestador[]
   mails           MailPrestador[]
   especialidades  PrestadorEspecialidad[]
@@ -120,7 +119,8 @@ model LugarAtencion {
   localidad     String             @db.VarChar(50)
   codigoPostal  String             @db.VarChar(15)
   provincia     String             @db.VarChar(50)
-  prestadores   Prestador[]
+  cuitCuilFK    String?            @db.VarChar(25)
+  prestador     Prestador?         @relation(fields: [cuitCuilFK], references: [cuitCuil])
   horarios      HorarioAtencion[]
 }
 

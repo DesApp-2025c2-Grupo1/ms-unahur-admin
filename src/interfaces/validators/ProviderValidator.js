@@ -38,17 +38,20 @@ const validateProviderCreate = [
         .optional()
         .isInt().withMessage('especialidad debe ser id numérico'),
 
-    body('lugarAtencion')
+    // Validar lugaresAtencion como un array de objetos
+    body('lugaresAtencion')
         .optional()
-        .isObject().withMessage('lugarAtencion debe ser un objeto'),
-    body('lugarAtencion.direccion').optional().isString(),
-    body('lugarAtencion.localidad').optional().isString(),
-    body('lugarAtencion.provincia').optional().isString(),
-    body('lugarAtencion.codigoPostal').optional().isString(),
-    body('lugarAtencion.horarios').optional().isArray(),
-    body('lugarAtencion.horarios.*.dias').optional().isArray(),
-    body('lugarAtencion.horarios.*.desde').optional().matches(/^([01]\d|2[0-3]):[0-5]\d$/).withMessage('hora desde formato HH:MM'),
-    body('lugarAtencion.horarios.*.hasta').optional().matches(/^([01]\d|2[0-3]):[0-5]\d$/).withMessage('hora hasta formato HH:MM'),
+        .isArray().withMessage('lugaresAtencion debe ser un array'),
+    body('lugaresAtencion.*.etiqueta').optional().isString(),
+    body('lugaresAtencion.*.calle').optional().isString(),
+    body('lugaresAtencion.*.numero').optional().isString(),
+    body('lugaresAtencion.*.localidad').optional().isString(),
+    body('lugaresAtencion.*.provincia').optional().isString(),
+    body('lugaresAtencion.*.cp').optional().isString(),
+    body('lugaresAtencion.*.horarios').optional().isArray(),
+    body('lugaresAtencion.*.horarios.*.dias').optional().isArray(),
+    body('lugaresAtencion.*.horarios.*.desde').optional().matches(/^([01]\d|2[0-3]):[0-5]\d$/).withMessage('hora desde formato HH:MM'),
+    body('lugaresAtencion.*.horarios.*.hasta').optional().matches(/^([01]\d|2[0-3]):[0-5]\d$/).withMessage('hora hasta formato HH:MM'),
 ];
 
 const validateProviderUpdate = [
@@ -61,15 +64,19 @@ const validateProviderUpdate = [
     body('mails.*').optional().isEmail(),
     body('especialidades').optional().isArray(),
     body('especialidades.*').optional().isInt(),
-    body('lugarAtencion').optional().isObject(),
-    body('lugarAtencion.direccion').optional().isString(),
-    body('lugarAtencion.localidad').optional().isString(),
-    body('lugarAtencion.provincia').optional().isString(),
-    body('lugarAtencion.codigoPostal').optional().isString(),
-    body('lugarAtencion.horarios').optional().isArray(),
-    body('lugarAtencion.horarios.*.dias').optional().isArray(),
-    body('lugarAtencion.horarios.*.desde').optional().matches(/^([01]\d|2[0-3]):[0-5]\d$/),
-    body('lugarAtencion.horarios.*.hasta').optional().matches(/^([01]\d|2[0-3]):[0-5]\d$/),
+    
+    // Validar lugaresAtencion como un array de objetos
+    body('lugaresAtencion').optional().isArray(),
+    body('lugaresAtencion.*.etiqueta').optional().isString(),
+    body('lugaresAtencion.*.calle').optional().isString(),
+    body('lugaresAtencion.*.numero').optional().isString(),
+    body('lugaresAtencion.*.localidad').optional().isString(),
+    body('lugaresAtencion.*.provincia').optional().isString(),
+    body('lugaresAtencion.*.cp').optional().isString(),
+    body('lugaresAtencion.*.horarios').optional().isArray(),
+    body('lugaresAtencion.*.horarios.*.dias').optional().isArray(),
+    body('lugaresAtencion.*.horarios.*.desde').optional().matches(/^([01]\d|2[0-3]):[0-5]\d$/),
+    body('lugaresAtencion.*.horarios.*.hasta').optional().matches(/^([01]\d|2[0-3]):[0-5]\d$/),
 ];
 
 module.exports = { validateProviderCreate, validateProviderUpdate };

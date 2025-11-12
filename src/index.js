@@ -6,10 +6,11 @@ const cors = require('cors');
 const affiliateRoutes = require("@routes/affiliateRoutes");
 const planRoutes = require('@routes/planRoutes');
 const therapeuticSituationRoutes = require('@routes/therapeuticSituationRoutes')
+const providerRoute = require('@routes/providerRoute');
+const specialtyRoute = require('@routes/specialtyRoute');
 
-// Providers
-const providerRoute = require('./interfaces/routes/providerRoute');
-const specialtyRoute = require('./interfaces/routes/specialtyRoute');
+//task
+const task = require('./task/AffiliateScheduledRegistration');
 
 const app = express();
 app.use(express.json());
@@ -19,7 +20,7 @@ app.use("/api", affiliateRoutes);
 app.use("/api", planRoutes);
 app.use("/api", therapeuticSituationRoutes)
 app.use(providerRoute);
-// Specialty routes mounted at root (no /api prefix)
+
 app.use(specialtyRoute);
 const PORT = process.env.PORT || 3000;
 

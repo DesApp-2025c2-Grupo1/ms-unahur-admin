@@ -21,6 +21,12 @@ class AffiliateService {
         return this.repo.findAll();
     }
 
+    async getAffiliateByDni(dni) {
+        const affiliate = await this.repo.getAffiliateByDni(dni);
+        console.log(affiliate);
+        return affiliate;
+    }
+
     // Crear afiliado principal y sus familiares
     async createAffiliate(affiliate) {
         if (await this.exists(affiliate.dni)) {
@@ -31,17 +37,25 @@ class AffiliateService {
         const holder = await this.createHolder(affiliate);
         const baseCredencial = holder.credencial.split('-')[0];
         const familyGroupId = holder.grupoFamiliar.idGrupoFamiliar; // 🔹 Guarda el grupo familiar del titular
+        const dateHigh = holder.fecha_alta;
 
         // Crear familiares si existen
         if (affiliate.familiares?.length > 0) {
             for (const [index, fam] of affiliate.familiares.entries()) {
-                await this.createFamilyMember(fam, baseCredencial, index, affiliate.plan, familyGroupId);
+                await this.createFamilyMember(fam, baseCredencial, index, affiliate.plan, familyGroupId, dateHigh);
             }
         }
 
         return holder;
     }
 
+    // Modificar afiliado
+    async updateAffiliate(dni,data) {
+        // console.log(data.telefonos),
+        // console.log(data.emails),
+        // console.log(data.situaciones)
+        await this.repo.update(dni,data)
+    }
 
     // Crear el titular
     async createHolder(holderData) {
@@ -53,11 +67,11 @@ class AffiliateService {
         const nextFamilyNumber = count + 1;
         const baseCredencial = `${nextFamilyNumber.toString().padStart(7, '0')}-01`;
 
-        return await this.repo.create(holderData, baseCredencial, emails, telephones, situations, holderData.plan);
+        return await this.repo.create(holderData, baseCredencial, emails, telephones, situations, holderData.plan, null, holderData.fecha_alta);
     }
 
     // Crear un familiar
-    async createFamilyMember(familyData, baseCredencial, index, plan, familyGroupId) {
+    async createFamilyMember(familyData, baseCredencial, index, plan, familyGroupId, dateHigh) {
         const emails = this.getEmails(familyData.emails);
         const situations = this.getSituations(familyData.situaciones);
         const telephones = this.getTelephones(familyData.telefonos);
@@ -71,7 +85,8 @@ class AffiliateService {
             telephones,
             situations,
             plan,
-            familyGroupId // 🔹 Pasa el grupo del titular
+            familyGroupId,
+            dateHigh
         );
     }
 
@@ -120,9 +135,18 @@ class AffiliateService {
         return situationList.map(s => s);
     }
 
+    async deleteEmail(dni, email) {
+        await this.emailServ.deleteEmail(dni, email)
+    }
+
+    async deleteTelephone(dni, telephone) {
+        await this.telService.deleteTelephone(dni, telephone)
+    }
+
     async exists(dni) {
         return await this.repo.exists(dni);
     }
+
 }
 
 module.exports = AffiliateService;
