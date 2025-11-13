@@ -83,14 +83,24 @@ class AffiliateRepository2 {
     parseDate = (date) => {
         if (!date) return null;
         if (date instanceof Date) return date;
-        if (/^\d{4}-\d{2}-\d{2}$/.test(date)) return new Date(date); // ISO
+
+        // Si viene en formato ISO (YYYY-MM-DD)
+        if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+            // Agregar la hora al mediodía para evitar problemas de timezone
+            return new Date(date + 'T12:00:00.000Z');
+        }
+
+        // Si viene en formato DD/MM/YYYY
         const parts = date.split('/');
         if (parts.length === 3) {
             const [day, month, year] = parts;
-            return new Date(`${year}-${month}-${day}`);
+            // Crear fecha al mediodía UTC
+            return new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day), 12, 0, 0));
         }
+
         return new Date(date);
     };
+
 
     async create(affiliate, credential, emails, telephones, situations, plan, familyGroupId = null, fechaAlta = null) {
         if (fechaAlta) {
@@ -218,9 +228,9 @@ class AffiliateRepository2 {
             situacionesEliminadas = []
         } = data;
 
-        console.log("🔍 Repository - Iniciando update");
-        console.log("🔍 Repository - Situaciones a eliminar:", situacionesEliminadas);
-        console.log("🔍 Repository - Situaciones a actualizar:", situaciones);
+        console.log("Repository - Iniciando update");
+        console.log("Repository - Situaciones a eliminar:", situacionesEliminadas);
+        console.log("Repository - Situaciones a actualizar:", situaciones);
 
         //Obtener afiliado actual - SIN filtrar situaciones por esta_activo
         const currentAffiliate = await prisma.afiliado.findUnique({
@@ -240,7 +250,7 @@ class AffiliateRepository2 {
             throw new Error(`Afiliado con DNI ${dni} no encontrado`);
         }
 
-        console.log("🔍 Repository - Todas las situaciones en BD:",
+        console.log("Repository - Todas las situaciones en BD:",
             currentAffiliate.situaciones.map(s => `ID:${s.idSituacionAfiliado} activo:${s.esta_activo}`)
         );
 
@@ -248,7 +258,7 @@ class AffiliateRepository2 {
 
         //Eliminar situaciones marcadas
         if (situacionesEliminadas.length > 0) {
-            console.log("🗑️ ANTES DE ELIMINAR - Intentando eliminar situaciones:", situacionesEliminadas);
+            console.log("ANTES DE ELIMINAR - Intentando eliminar situaciones:", situacionesEliminadas);
 
             //QUITAR el filtro esta_activo: true del where para que encuentre las situaciones
             const deleteResult = await prisma.situacionAfiliado.updateMany({
@@ -346,9 +356,6 @@ class AffiliateRepository2 {
 
         return finalAffiliate;
     }
-
-
-
 
     // Método auxiliar para actualizar teléfonos
     async updateTelephones(dni, currentTelephones, newTelephones) {
