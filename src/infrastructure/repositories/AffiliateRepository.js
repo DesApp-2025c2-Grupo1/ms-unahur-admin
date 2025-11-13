@@ -23,12 +23,12 @@ class AffiliateRepository2 {
         return prisma.afiliado.findFirst({
             where: {
                 dni,
-                parentesco: TITULAR,
+                // ❌ REMOVIDO: parentesco: TITULAR,
                 esta_activo: true,
             },
             include: {
                 situaciones: {
-                    where: { dniFK: dni, esta_activo: true }, //Solo situaciones activas
+                    where: { dniFK: dni, esta_activo: true },
                     include: {
                         situacionTerapeutica: true,
                     },
@@ -47,6 +47,7 @@ class AffiliateRepository2 {
     }
 
 
+
     // obtiene el codigo del grupo familiar (retorna el id o null)
     async getFamilyGroupNumber(dni) {
         return prisma.afiliado.findFirst({
@@ -57,8 +58,14 @@ class AffiliateRepository2 {
 
     async getFamily(groupId) {
         return prisma.afiliado.findMany({
-            where: { idGrupoFamiliarFK: groupId },
+            where: { idGrupoFamiliarFK: groupId, esta_activo: true },
             include: {
+                situaciones: {
+                    where: { esta_activo: true },
+                    include: {
+                        situacionTerapeutica: true,
+                    },
+                },
                 emails: {
                     where: { esta_activo: true },
                 },
@@ -71,6 +78,7 @@ class AffiliateRepository2 {
             },
         });
     }
+
 
     async getDniOfTheFamilyGroup(groupId) {
         return prisma.afiliado.findMany({
