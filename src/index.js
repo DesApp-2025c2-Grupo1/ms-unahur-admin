@@ -8,6 +8,7 @@ const planRoutes = require('@routes/planRoutes');
 const therapeuticSituationRoutes = require('@routes/therapeuticSituationRoutes')
 const providerRoute = require('@routes/providerRoute');
 const specialtyRoute = require('@routes/specialtyRoute');
+const reportRoutes = require('@routes/reportRoutes');
 
 //task
 const task = require('./task/AffiliateScheduledRegistration');
@@ -19,6 +20,7 @@ app.use(cors())
 app.use("/api", affiliateRoutes);
 app.use("/api", planRoutes);
 app.use("/api", therapeuticSituationRoutes)
+app.use("/api", reportRoutes);
 app.use(providerRoute);
 
 app.use(specialtyRoute);

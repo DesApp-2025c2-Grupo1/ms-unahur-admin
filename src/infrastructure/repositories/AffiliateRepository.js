@@ -110,7 +110,7 @@ class AffiliateRepository2 {
     };
 
 
-    async create(affiliate, credential, emails, telephones, situations, plan, familyGroupId = null, fechaAlta = null) {
+    /*async create(affiliate, credential, emails, telephones, situations, plan, familyGroupId = null, fechaAlta = null) {
         if (fechaAlta) {
             return prisma.afiliado.create({
                 data: {
@@ -159,6 +159,50 @@ class AffiliateRepository2 {
                 tipoDocumento: 'DNI',
                 emails: emails?.length ? { create: emails.map(e => ({ email: e })) } : undefined,
                 telefonos: telephones?.length ? { create: telephones.map(t => ({ telefono: t })) } : undefined,
+                fecha_nacimiento: this.parseDate(affiliate.fecha_nacimiento),
+                grupoFamiliar: familyGroupId
+                    ? { connect: { idGrupoFamiliar: familyGroupId } }
+                    : { create: { idPlanFK: plan, nroAfiliado: credential } },
+                emails: emails?.length ? { create: emails.map(e => ({ email: e })) } : undefined,
+                telefonos: telephones?.length ? { create: telephones.map(t => ({ telefono: t })) } : undefined,
+                situaciones: situations?.length
+                    ? {
+                        create: situations.map(s => ({
+                            idSituacionFK: s.id,
+                            fechaInicio: this.parseDate(s.fecha_inicio),
+                            fechaFin: s.fecha_fin ? this.parseDate(s.fecha_fin) : null
+                        }))
+                    }
+                    : undefined
+            },
+            include: {
+                grupoFamiliar: true,
+                emails: true,
+                telefonos: true,
+                situaciones: true
+            }
+        });
+    }*/
+
+    async create(affiliate, credential, emails, telephones, situations, plan, familyGroupId = null, fechaAlta = null) {
+        // Si no viene fechaAlta, usar la fecha actual
+        const fechaAltaFinal = fechaAlta ? this.parseDate(fechaAlta) : new Date();
+
+        // Si es alta inmediata (sin fechaAlta programada), esta_activo = true y es_programada = false
+        const esAltaInmediata = !fechaAlta;
+
+        return prisma.afiliado.create({
+            data: {
+                dni: affiliate.dni,
+                nombre: affiliate.nombre,
+                apellido: affiliate.apellido,
+                credencial: `${credential}`,
+                parentesco: affiliate.parentesco || TITULAR,
+                direccion: affiliate.direccion || 'N/A',
+                es_programada: !esAltaInmediata, // false si es inmediata, true si es programada
+                fecha_alta: fechaAltaFinal, // fecha actual o fecha programada
+                tipoDocumento: 'DNI',
+                esta_activo: esAltaInmediata, // true si es inmediata, false si es programada
                 fecha_nacimiento: this.parseDate(affiliate.fecha_nacimiento),
                 grupoFamiliar: familyGroupId
                     ? { connect: { idGrupoFamiliar: familyGroupId } }
