@@ -23,6 +23,15 @@ const especialidades = [
   { idEspecialidad: 8, nombre: 'Resonancias' },
 ];
 
+const situacionesTerapeuticas = [
+  { idSituacion: 1, nombre: 'Fonoaudiología' },
+  { idSituacion: 2, nombre: 'Psicología' },
+  { idSituacion: 3, nombre: 'Psicopedagogía' },
+  { idSituacion: 4, nombre: 'Terapia Ocupacional' },
+  { idSituacion: 5, nombre: 'Kinesiología' },
+  { idSituacion: 6, nombre: 'Acompañante Terapéutico' },
+];
+
 async function main() {
   console.log('🌱 Iniciando seed de la base de datos...');
 
@@ -47,6 +56,17 @@ async function main() {
     });
   }
   console.log(`✅ ${especialidades.length} especialidades insertadas/actualizadas`);
+
+  // Seed de situaciones terapéuticas
+  console.log('📋 Insertando situaciones terapéuticas...');
+  for (const situacion of situacionesTerapeuticas) {
+    await prisma.situacionTerapeutica.upsert({
+      where: { idSituacion: situacion.idSituacion },
+      update: { nombre: situacion.nombre },
+      create: situacion,
+    });
+  }
+  console.log(`✅ ${situacionesTerapeuticas.length} situaciones terapéuticas insertadas/actualizadas`);
 
   console.log('🎉 Seed completado exitosamente');
 }
