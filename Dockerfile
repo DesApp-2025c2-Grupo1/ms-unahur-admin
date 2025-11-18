@@ -6,12 +6,12 @@ RUN apk add --no-cache openssl libc6-compat
 
 WORKDIR /app
 
+# Establecer variable de entorno ANTES de copiar archivos
+ENV PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING=1
+
 # Copiar archivos de dependencias
 COPY package*.json ./
 COPY prisma ./prisma/
-
-# Establecer variable de entorno para ignorar error de checksum en entornos con problemas de red
-ENV PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING=1
 
 # Instalar dependencias (postinstall ejecutará prisma generate automáticamente)
 RUN npm install
