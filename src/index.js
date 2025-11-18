@@ -18,10 +18,9 @@ app.use(cors())
 
 app.use("/api", affiliateRoutes);
 app.use("/api", planRoutes);
-app.use("/api", therapeuticSituationRoutes)
-app.use(providerRoute);
-
-app.use(specialtyRoute);
+app.use("/api", therapeuticSituationRoutes);
+app.use("/api", providerRoute);
+app.use("/api", specialtyRoute);
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
