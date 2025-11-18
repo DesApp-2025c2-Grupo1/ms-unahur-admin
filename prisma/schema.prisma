@@ -104,6 +104,7 @@ model Prestador {
   cuitCuil        String                 @id @db.VarChar(25)
   nombreCompleto  String                 @db.VarChar(100)
   tipoPrestador   TipoPrestador
+  fechaAlta       DateTime @default(now())
   centroMedicoId  String?                @db.VarChar(25)
   centroMedico    Prestador?             @relation("CentroMedicoRelation", fields: [centroMedicoId], references: [cuitCuil])
   profesionales   Prestador[]            @relation("CentroMedicoRelation")
