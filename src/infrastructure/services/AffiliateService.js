@@ -116,6 +116,62 @@ class AffiliateService {
         return familyMembers;
     }
 
+    // Agregar familiar a un grupo existente
+    async addFamilyMember(dniTitular, familyData) {
+        // Obtener el grupo familiar del titular
+        const titular = await this.repo.getFamilyGroupNumber(dniTitular);
+        if (!titular || !titular.idGrupoFamiliarFK) {
+            throw new Error(`No se encontró el grupo familiar para el titular con DNI ${dniTitular}`);
+        }
+
+        const familyGroupId = titular.idGrupoFamiliarFK;
+
+        // Verificar que el familiar no exista ya
+        if (await this.exists(familyData.dni)) {
+            throw new Error(`El afiliado con DNI ${familyData.dni} ya existe.`);
+        }
+
+        // Obtener los miembros actuales para calcular el siguiente número de credencial
+        const currentMembers = await this.repo.getFamily(familyGroupId);
+        const nextMemberNumber = currentMembers.length + 1;
+
+        // Obtener la credencial base del grupo (primeros 7 dígitos)
+        const titularAffiliate = currentMembers.find(m => m.parentesco === 'Titular');
+        if (!titularAffiliate) {
+            throw new Error('No se encontró el titular del grupo familiar');
+        }
+        const baseCredencial = titularAffiliate.credencial.split('-')[0];
+
+        // Generar la credencial del nuevo familiar
+        const credencialFamiliar = `${baseCredencial}-${nextMemberNumber.toString().padStart(2, '0')}`;
+
+        // Procesar emails, teléfonos y situaciones
+        const emails = this.getEmails(familyData.emails);
+        const situations = this.getSituations(familyData.situaciones);
+        const telephones = this.getTelephones(familyData.telefonos);
+
+        console.log('Creando familiar independiente:', {
+            dni: familyData.dni,
+            nombre: familyData.nombre,
+            apellido: familyData.apellido,
+            parentesco: familyData.parentesco,
+            credencial: credencialFamiliar,
+            familyGroupId: familyGroupId
+        });
+
+        // Crear el familiar
+        return await this.repo.create(
+            { ...familyData, parentesco: familyData.parentesco || 'Familiar' },
+            credencialFamiliar,
+            emails,
+            telephones,
+            situations,
+            familyData.plan,
+            familyGroupId,
+            null // sin fecha de alta programada
+        );
+    }
+
     async getFamilyGroupDniList(familyGroupId) {
         const familyMembers = await this.repo.getDniOfTheFamilyGroup(familyGroupId);
         return familyMembers.map(f => f.dni);
