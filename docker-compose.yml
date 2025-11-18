@@ -1,6 +1,7 @@
 version: "3.8"
 
 services:
+  # Base de datos PostgreSQL
   db:
     image: postgres:16
     container_name: unahur-db
@@ -13,7 +14,53 @@ services:
       POSTGRES_PASSWORD: postgres
     volumes:
       - local_pgdata:/var/lib/postgresql/data
+    networks:
+      - unahur-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d mediunahur_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
+  # Backend API
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: unahur-backend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: "postgresql://postgres:postgres@db:5432/mediunahur_db?schema=public"
+      PORT: 3000
+      NODE_ENV: development
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - unahur-network
+    volumes:
+      - ./src:/app/src
+      - ./prisma:/app/prisma
+
+  # Frontend React
+  frontend:
+    build:
+      context: ../Administration-FrontEnd
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=http://localhost:3000/api
+    container_name: unahur-frontend
+    restart: always
+    ports:
+      - "8081:80"
+    depends_on:
+      - backend
+    networks:
+      - unahur-network
+
+  # PgAdmin para administrar la BD
   pgadmin:
     image: dpage/pgadmin4
     container_name: pgadmin_web
@@ -27,6 +74,12 @@ services:
       PGADMIN_DEFAULT_PASSWORD: pgadminpassword
     volumes:
       - pgadmin-data:/var/lib/pgadmin
+    networks:
+      - unahur-network
+
+networks:
+  unahur-network:
+    driver: bridge
 
 volumes:
   local_pgdata:
