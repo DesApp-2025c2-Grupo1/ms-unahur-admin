@@ -13,6 +13,9 @@ COPY prisma ./prisma/
 # Instalar dependencias
 RUN npm install
 
+# Establecer variable de entorno para ignorar error de checksum en entornos con problemas de red
+ENV PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING=1
+
 # Generar cliente de Prisma
 RUN npx prisma generate
 
