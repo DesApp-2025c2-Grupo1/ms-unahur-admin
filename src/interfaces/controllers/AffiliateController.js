@@ -125,6 +125,28 @@ class AffiliateController {
         }
     }
 
+    async addFamilyMember(req, res) {
+        try {
+            const { dni } = req.params; // DNI del titular
+            const familyData = req.body;
+
+            console.log('📥 Controller - Agregando familiar al grupo del titular:', dni);
+            console.log('📥 Controller - Datos del familiar:', familyData);
+
+            const newMember = await this.service.addFamilyMember(dni, familyData);
+            
+            return res.status(201).json({
+                message: 'Familiar agregado exitosamente',
+                affiliate: this.mapper.map(newMember)
+            });
+        } catch (error) {
+            console.error('❌ Controller - Error al agregar familiar:', error);
+            return res.status(500).json({
+                error: error.message || 'Error al agregar el familiar'
+            });
+        }
+    }
+
     async updatePlan(req, res) {
         try {
             const { dni } = req.params;

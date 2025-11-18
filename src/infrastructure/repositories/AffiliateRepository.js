@@ -8,6 +8,11 @@ class AffiliateRepository2 {
         return prisma.afiliado.findMany({
             where: { parentesco: TITULAR, esta_activo: true },
             include: {
+                situaciones: {
+                    include: {
+                        situacionTerapeutica: true,
+                    },
+                },
                 emails: {
                     where: { esta_activo: true },
                 },
@@ -28,7 +33,6 @@ class AffiliateRepository2 {
             },
             include: {
                 situaciones: {
-                    where: { dniFK: dni, esta_activo: true },
                     include: {
                         situacionTerapeutica: true,
                     },
@@ -58,22 +62,21 @@ class AffiliateRepository2 {
 
     async getFamily(groupId) {
         return prisma.afiliado.findMany({
-            where: { idGrupoFamiliarFK: groupId, esta_activo: true },
+            where: { 
+                idGrupoFamiliarFK: groupId
+            },
             include: {
                 situaciones: {
-                    where: { esta_activo: true },
                     include: {
                         situacionTerapeutica: true,
                     },
                 },
                 emails: {
-                    where: { esta_activo: true },
                 },
                 grupoFamiliar: {
                     select: { plan: true },
                 },
                 telefonos: {
-                    where: { esta_activo: true }
                 },
             },
         });
