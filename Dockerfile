@@ -29,5 +29,5 @@ EXPOSE 3000
 ENV NODE_ENV=production
 ENV PORT=3000
 
-# Ejecutar migraciones, seed (solo si RUN_SEED=true) y arrancar la aplicación
-CMD ["sh", "-c", "npx prisma migrate deploy && ([ \"$RUN_SEED\" = \"true\" ] && npm run seed || echo 'Skipping seed') && node src/index.js"]
+# Ejecutar migraciones, seed y arrancar la aplicación
+CMD ["sh", "-c", "npx prisma migrate deploy && npm run seed && node src/index.js"]
