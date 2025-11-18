@@ -22,7 +22,7 @@ const validateProviderCreate = [
     body('telefonos.*')
         .optional()
         .isString().withMessage('teléfono debe ser texto')
-        .isLength({ min: 6 }).withMessage('teléfono muy corto'),
+        .isLength({ min: 3, max: 20 }).withMessage('teléfono debe tener entre 3 y 20 caracteres'),
 
     body('mails')
         .optional()
