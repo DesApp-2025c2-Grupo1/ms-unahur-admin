@@ -85,6 +85,22 @@ class AffiliateController {
         }
     }
 
+    async deleteFamilyMember(req, res) {
+        try {
+            const { dni } = req.params;
+            console.log('🗑️ Controller - Eliminando miembro del grupo familiar con DNI:', dni);
+            
+            const result = await this.service.deleteFamilyMember(dni);
+            
+            return res.status(200).json(result);
+        } catch (error) {
+            console.error('❌ Controller - Error al eliminar miembro:', error);
+            return res.status(500).json({
+                error: error.message || 'Error al eliminar el miembro del grupo familiar'
+            });
+        }
+    }
+
     async deleteEmail(req, res) {
         try {
             const { dni } = req.params;

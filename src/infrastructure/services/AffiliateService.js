@@ -110,6 +110,33 @@ class AffiliateService {
         await this.deleteAffiliateAndRelatedData(dniList);
     }
 
+    async deleteFamilyMember(dni) {
+        const affiliate = await this.repo.getAffiliateByDni(dni);
+        if (!affiliate) {
+            throw new Error(`No se encontró el afiliado con DNI ${dni}`);
+        }
+
+        if (!affiliate.idGrupoFamiliarFK) {
+            throw new Error(`El afiliado con DNI ${dni} no pertenece a ningún grupo familiar`);
+        }
+
+        if (affiliate.parentesco === 'Titular') {
+            throw new Error('No se puede eliminar al titular del grupo familiar. Debe eliminar todo el grupo.');
+        }
+
+        console.log('🗑️ Eliminando miembro del grupo familiar:', {
+            dni: affiliate.dni,
+            nombre: affiliate.nombre,
+            apellido: affiliate.apellido,
+            parentesco: affiliate.parentesco,
+            grupoFamiliar: affiliate.idGrupoFamiliarFK
+        });
+
+        await this.deleteAffiliateAndRelatedData([dni]);
+        
+        return { message: `Afiliado ${affiliate.nombre} ${affiliate.apellido} eliminado correctamente` };
+    }
+
     async getFamilyGroup(dni) {
         const familyGroup = await this.repo.getFamilyGroupNumber(dni);
         const familyMembers = await this.repo.getFamily(familyGroup.idGrupoFamiliarFK);
