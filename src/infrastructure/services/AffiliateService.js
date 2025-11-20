@@ -94,8 +94,9 @@ class AffiliateService {
             situations,
             plan,
             familyGroupId,
-            dateHigh
+            null //Sin fecha_alta programada - se crea activo inmediatamente
         );
+
     }
 
     // Métodos de eliminación

@@ -62,7 +62,7 @@ class AffiliateRepository2 {
 
     async getFamily(groupId) {
         return prisma.afiliado.findMany({
-            where: { 
+            where: {
                 idGrupoFamiliarFK: groupId
             },
             include: {
@@ -91,22 +91,65 @@ class AffiliateRepository2 {
     }
 
 
-    parseDate = (date) => {
+    /*parseDate = (date) => {
         if (!date) return null;
         if (date instanceof Date) return date;
 
         // Si viene en formato ISO (YYYY-MM-DD)
         if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-            // Agregar la hora al mediodía para evitar problemas de timezone
-            return new Date(date + 'T12:00:00.000Z');
+            // Convertir a fecha al inicio del día en la zona horaria del servidor (UTC-3)
+            const [year, month, day] = date.split('-');
+            const d = new Date(Date.UTC(
+                parseInt(year),
+                parseInt(month) - 1,
+                parseInt(day),
+                3, // Ajuste para UTC-3 (sumar 3 horas)
+                0,
+                0
+            ));
+            return d;
         }
 
         // Si viene en formato DD/MM/YYYY
         const parts = date.split('/');
         if (parts.length === 3) {
             const [day, month, year] = parts;
-            // Crear fecha al mediodía UTC
-            return new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day), 12, 0, 0));
+            const d = new Date(Date.UTC(
+                parseInt(year),
+                parseInt(month) - 1,
+                parseInt(day),
+                3, // Ajuste para UTC-3
+                0,
+                0
+            ));
+            return d;
+        }
+
+        // Fallback: parse como está
+        return new Date(date);
+    };*/
+
+    /**
+ * Como la BD está en America/Argentina/Buenos_Aires,
+ * NO necesitamos conversiones de zona horaria.
+ * Solo parseamos correctamente.
+ */
+
+    parseDate = (date) => {
+        if (!date) return null;
+        if (date instanceof Date) return date;
+
+        // Si viene en formato ISO (YYYY-MM-DD)
+        if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+            // Simplemente crear la fecha sin ajustes
+            return new Date(date + 'T00:00:00');
+        }
+
+        // Si viene en formato DD/MM/YYYY
+        const parts = date.split('/');
+        if (parts.length === 3) {
+            const [day, month, year] = parts;
+            return new Date(`${year}-${month}-${day}T00:00:00`);
         }
 
         return new Date(date);
@@ -188,11 +231,27 @@ class AffiliateRepository2 {
     }*/
 
     async create(affiliate, credential, emails, telephones, situations, plan, familyGroupId = null, fechaAlta = null) {
-        // Si no viene fechaAlta, usar la fecha actual
-        const fechaAltaFinal = fechaAlta ? this.parseDate(fechaAlta) : new Date();
+        /**
+         * Lógica:
+         * - Si NO viene fechaAlta: es alta inmediata → esta_activo = true, es_programada = false
+         * - Si viene fechaAlta: es alta programada → esta_activo = false, es_programada = true
+         */
 
-        // Si es alta inmediata (sin fechaAlta programada), esta_activo = true y es_programada = false
         const esAltaInmediata = !fechaAlta;
+
+        // Si es alta inmediata, usar NOW() de la BD
+        // Si es alta programada, usar la fecha que viene
+        let fechaAltaFinal = fechaAlta ? this.parseDate(fechaAlta) : new Date();
+
+        console.log(`📝 Creando afiliado:`, {
+            dni: affiliate.dni,
+            nombre: affiliate.nombre,
+            credencial: credential,
+            esAltaInmediata,
+            fechaAlta: fechaAlta,
+            fechaAltaFinal,
+            esta_activo: esAltaInmediata
+        });
 
         return prisma.afiliado.create({
             data: {
@@ -202,10 +261,10 @@ class AffiliateRepository2 {
                 credencial: `${credential}`,
                 parentesco: affiliate.parentesco || TITULAR,
                 direccion: affiliate.direccion || 'N/A',
-                es_programada: !esAltaInmediata, // false si es inmediata, true si es programada
-                fecha_alta: fechaAltaFinal, // fecha actual o fecha programada
+                es_programada: !esAltaInmediata,
+                fecha_alta: fechaAltaFinal,
                 tipoDocumento: 'DNI',
-                esta_activo: esAltaInmediata, // true si es inmediata, false si es programada
+                esta_activo: esAltaInmediata, // ✅ true si es inmediata, false si es programada
                 fecha_nacimiento: this.parseDate(affiliate.fecha_nacimiento),
                 grupoFamiliar: familyGroupId
                     ? { connect: { idGrupoFamiliar: familyGroupId } }
@@ -230,6 +289,28 @@ class AffiliateRepository2 {
             }
         });
     }
+
+    parseDate = (date) => {
+        if (!date) return null;
+        if (date instanceof Date) return date;
+
+        // Si viene en formato ISO (YYYY-MM-DD)
+        if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+            // La BD está en America/Argentina/Buenos_Aires, así que solo parseamos
+            return new Date(date + 'T00:00:00');
+        }
+
+        // Si viene en formato DD/MM/YYYY
+        const parts = date.split('/');
+        if (parts.length === 3) {
+            const [day, month, year] = parts;
+            return new Date(`${year}-${month}-${day}T00:00:00`);
+        }
+
+        // Fallback
+        return new Date(date);
+    };
+
 
     async exists(dni) {
         return prisma.afiliado.findUnique({
@@ -287,15 +368,14 @@ class AffiliateRepository2 {
         console.log("Repository - Situaciones a eliminar:", situacionesEliminadas);
         console.log("Repository - Situaciones a actualizar:", situaciones);
 
-        //Obtener afiliado actual - SIN filtrar situaciones por esta_activo
+        // Obtener afiliado actual con TODAS las situaciones (sin filtrar por esta_activo)
         const currentAffiliate = await prisma.afiliado.findUnique({
             where: { dni },
             include: {
                 telefonos: { where: { esta_activo: true } },
                 emails: { where: { esta_activo: true } },
                 situaciones: {
-                    //QUITAR el filtro esta_activo aquí para poder procesarlas
-                    where: { dniFK: dni },
+                    where: { dniFK: dni }, // NO filtrar por esta_activo aquí
                     include: { situacionTerapeutica: true }
                 }
             }
@@ -305,32 +385,20 @@ class AffiliateRepository2 {
             throw new Error(`Afiliado con DNI ${dni} no encontrado`);
         }
 
-        console.log("Repository - Todas las situaciones en BD:",
-            currentAffiliate.situaciones.map(s => `ID:${s.idSituacionAfiliado} activo:${s.esta_activo}`)
-        );
-
-        //IMPORTANTE: ELIMINAR PRIMERO, ANTES DE ACTUALIZAR
-
-        //Eliminar situaciones marcadas
+        // IMPORTANTE: ELIMINAR PRIMERO
         if (situacionesEliminadas.length > 0) {
-            console.log("ANTES DE ELIMINAR - Intentando eliminar situaciones:", situacionesEliminadas);
-
-            //QUITAR el filtro esta_activo: true del where para que encuentre las situaciones
-            const deleteResult = await prisma.situacionAfiliado.updateMany({
+            console.log("Eliminando situaciones:", situacionesEliminadas);
+            await prisma.situacionAfiliado.updateMany({
                 where: {
                     idSituacionAfiliado: { in: situacionesEliminadas },
                     dniFK: dni
-                    //NO poner: esta_activo: true
                 },
                 data: { esta_activo: false }
             });
-
-            console.log(`Situaciones marcadas como inactivas: ${deleteResult.count} de ${situacionesEliminadas.length}`);
         }
 
-        // Eliminar teléfonos marcados
+        // Eliminar teléfonos
         if (telefonosEliminados.length > 0) {
-            console.log("Eliminando teléfonos:", telefonosEliminados);
             await prisma.afiliadoTelefono.updateMany({
                 where: {
                     id: { in: telefonosEliminados },
@@ -340,9 +408,8 @@ class AffiliateRepository2 {
             });
         }
 
-        // Eliminar emails marcados
+        // Eliminar emails
         if (emailsEliminados.length > 0) {
-            console.log("Eliminando emails:", emailsEliminados);
             await prisma.afiliadoEmail.updateMany({
                 where: {
                     id: { in: emailsEliminados },
@@ -352,7 +419,7 @@ class AffiliateRepository2 {
             });
         }
 
-        // AHORA SÍ, ACTUALIZAR DATOS BÁSICOS
+        // Actualizar datos básicos
         const updated = await prisma.afiliado.update({
             where: { dni },
             data: {
@@ -363,34 +430,28 @@ class AffiliateRepository2 {
             }
         });
 
-        // Actualizar plan si viene
+        // Actualizar plan
         if (idPlan) {
             await this.updatePlan(dni, idPlan);
         }
 
         // Gestionar teléfonos
         if (telefonos.length > 0) {
-            // Filtrar solo los activos para el update
-            const activePhones = currentAffiliate.telefonos.filter(t => t.esta_activo);
-            await this.updateTelephones(dni, activePhones, telefonos);
+            await this.updateTelephones(dni, currentAffiliate.telefonos, telefonos);
         }
 
         // Gestionar emails
         if (emails.length > 0) {
-            // Filtrar solo los activos para el update
-            const activeEmails = currentAffiliate.emails.filter(e => e.esta_activo);
-            await this.updateEmails(dni, activeEmails, emails);
+            await this.updateEmails(dni, currentAffiliate.emails, emails);
         }
 
-        // Gestionar situaciones (crear y actualizar)
+        // Gestionar situaciones
         if (situaciones.length > 0) {
-            console.log("Procesando situaciones...");
-            // Filtrar solo las activas para el update
             const activeSituations = currentAffiliate.situaciones.filter(s => s.esta_activo);
             await this.updateSituations(dni, activeSituations, situaciones);
         }
 
-        // Retornar el afiliado actualizado con SOLO las relaciones ACTIVAS
+        // Retornar afiliado actualizado
         const finalAffiliate = await prisma.afiliado.findUnique({
             where: { dni },
             include: {
@@ -398,17 +459,13 @@ class AffiliateRepository2 {
                 emails: { where: { esta_activo: true } },
                 grupoFamiliar: { select: { plan: true } },
                 situaciones: {
-                    where: { esta_activo: true }, // Al final sí filtrar por activas
+                    where: { esta_activo: true },
                     include: { situacionTerapeutica: true }
                 }
             }
         });
 
         console.log("Repository - Update finalizado");
-        console.log("Repository - Situaciones finales (activas):",
-            finalAffiliate.situaciones.map(s => s.idSituacionAfiliado)
-        );
-
         return finalAffiliate;
     }
 
