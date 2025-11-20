@@ -13,13 +13,11 @@ class AffiliateMapper {
     formatDate(date) {
         if (!date) return null;
         
-        // Crear la fecha interpretándola como hora local, no UTC
         const d = new Date(date);
         
-        // Usar getUTCDate para obtener el día en UTC (como está guardado en la BD)
-        const day = String(d.getUTCDate()).padStart(2, '0');
-        const month = String(d.getUTCMonth() + 1).padStart(2, '0');
-        const year = d.getUTCFullYear();
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
         
         return `${day}/${month}/${year}`;
     }
