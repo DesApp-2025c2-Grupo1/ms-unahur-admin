@@ -2,6 +2,23 @@ const { body } = require('express-validator');
 
 const CUIT_REGEX = /^[0-9]{1,2}-?[0-9]{6,8}-?[0-9]{1}$/;
 
+const validateNoDuplicateSpecialties = (req, res, next) => {
+    const { especialidades } = req.body;
+    
+    if (especialidades && Array.isArray(especialidades)) {
+        const uniqueIds = new Set(especialidades);
+        
+        if (uniqueIds.size !== especialidades.length) {
+            return res.status(400).json({ 
+                error: 'No se permiten especialidades duplicadas',
+                details: 'La lista de especialidades contiene IDs repetidos'
+            });
+        }
+    }
+    
+    next();
+};
+
 const validateProviderCreate = [
     body('cuitCuil')
         .notEmpty().withMessage('El CUIT/CUIL es obligatorio')
@@ -15,6 +32,24 @@ const validateProviderCreate = [
     body('tipoPrestador')
         .notEmpty().withMessage('El tipo de prestador es obligatorio')
         .isIn(['profesional', 'centro_medico']).withMessage('Tipo de prestador inválido'),
+
+    body('especialidades')
+        .optional()
+        .isArray().withMessage('especialidades debe ser un array de ids')
+        .custom((value) => {
+            if (value && value.length > 0) {
+                const uniqueIds = new Set(value);
+                if (uniqueIds.size !== value.length) {
+                    throw new Error('No se permiten especialidades duplicadas');
+                }
+            }
+            return true;
+        }),
+    
+    body('especialidades.*')
+        .optional()
+        .isInt({ min: 1 }).withMessage('especialidad debe ser id numérico positivo'),
+
 
     body('telefonos')
         .optional()
@@ -55,6 +90,23 @@ const validateProviderCreate = [
 ];
 
 const validateProviderUpdate = [
+    body('especialidades')
+        .optional()
+        .isArray()
+        .custom((value) => {
+            if (value && value.length > 0) {
+                const uniqueIds = new Set(value);
+                if (uniqueIds.size !== value.length) {
+                    throw new Error('No se permiten especialidades duplicadas');
+                }
+            }
+            return true;
+        }),
+    
+    body('especialidades.*')
+        .optional()
+        .isInt({ min: 1 }),
+
     // For update, nothing strictly required - but validate shapes if present
     body('nombreCompleto').optional().isString(),
     body('tipoPrestador').optional().isIn(['profesional', 'centro_medico']),
@@ -79,4 +131,8 @@ const validateProviderUpdate = [
     body('lugaresAtencion.*.horarios.*.hasta').optional().matches(/^([01]\d|2[0-3]):[0-5]\d$/),
 ];
 
-module.exports = { validateProviderCreate, validateProviderUpdate };
+module.exports = { 
+    validateProviderCreate, 
+    validateProviderUpdate, 
+    validateNoDuplicateSpecialties 
+};
