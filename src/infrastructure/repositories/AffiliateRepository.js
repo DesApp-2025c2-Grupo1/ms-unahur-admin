@@ -63,7 +63,8 @@ class AffiliateRepository2 {
     async getFamily(groupId) {
         return prisma.afiliado.findMany({
             where: {
-                idGrupoFamiliarFK: groupId
+                idGrupoFamiliarFK: groupId,
+                esta_activo: true
             },
             include: {
                 situaciones: {
