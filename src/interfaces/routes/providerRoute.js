@@ -28,4 +28,14 @@ router.put('/providers/:cuit', validateProviderUpdate, validateFields, (req, res
 // DELETE /providers/:cuit -> delete
 router.delete('/providers/:cuit', (req, res) => controller.delete(req, res));
 
+// GET /providers/:cuit/agendas-by-specialty?specialtyId=123 -> verificar agendas por especialidad
+router.get('/providers/:cuit/agendas-by-specialty', (req, res) =>
+    controller.checkAgendasBySpecialty(req, res).catch(err => res.status(500).json({ error: err.message }))
+);
+
+// GET /providers/:cuit/agendas-by-places -> verificar agendas por lugares
+router.get('/providers/:cuit/agendas-by-places', (req, res) =>
+    controller.checkAgendasByPlaces(req, res).catch(err => res.status(500).json({ error: err.message }))
+);
+
 module.exports = router;

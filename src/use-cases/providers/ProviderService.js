@@ -19,6 +19,25 @@ class ProviderService {
         return await this.providerRepository.create(payload);
     }
 
+    async checkAgendasBySpecialty(cuitCuil, specialtyId) {
+        try {
+            return await this.providerRepository.checkAgendasBySpecialty(cuitCuil, specialtyId);
+        } catch (error) {
+            console.error('Error in ProviderService.checkAgendasBySpecialty:', error);
+            throw error;
+        }
+    }
+
+    async checkAgendasByPlaces(cuitCuil) {
+        try {
+            return await this.providerRepository.checkAgendasByPlaces(cuitCuil);
+        } catch (error) {
+            console.error('Error in ProviderService.checkAgendasByPlaces:', error);
+            throw error;
+        }
+    }
+
+
     async update(cuitCuil, payload) {
         // Could validate conflicts (e.g., changing cuit to existing) here
         console.log(`[ProviderService.update] Iniciando actualización para CUIT ${cuitCuil}`);

@@ -3,7 +3,10 @@ class ProviderController {
         this.service = service;
         this.findAll = this.findAll.bind(this);
         this.findByCuitCuil = this.findByCuitCuil.bind(this);
+        this.checkAgendasBySpecialty = this.checkAgendasBySpecialty.bind(this);
+        this.checkAgendasByPlaces = this.checkAgendasByPlaces.bind(this);
     }
+
 
     async findAll(req, res) {
         try {
@@ -51,6 +54,39 @@ class ProviderController {
             return res.status(400).json({ error: error.message });
         }
     }
+
+    async checkAgendasBySpecialty(req, res) {
+        try {
+            const { cuit } = req.params;
+            const { specialtyId } = req.query;
+
+            if (!specialtyId) {
+                return res.status(400).json({
+                    error: 'Se requiere el parámetro specialtyId'
+                });
+            }
+
+            const agendas = await this.service.checkAgendasBySpecialty(cuit, specialtyId);
+            return res.status(200).json({ agendas, count: agendas.length });
+        } catch (error) {
+            console.error('ProviderController.checkAgendasBySpecialty error:', error);
+            return res.status(500).json({ error: error.message });
+        }
+    }
+
+    async checkAgendasByPlaces(req, res) {
+        try {
+            const { cuit } = req.params;
+
+            const agendas = await this.service.checkAgendasByPlaces(cuit);
+            return res.status(200).json({ agendas, count: agendas.length });
+        } catch (error) {
+            console.error('ProviderController.checkAgendasByPlaces error:', error);
+            return res.status(500).json({ error: error.message });
+        }
+    }
+
+
 
     async delete(req, res) {
         try {

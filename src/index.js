@@ -9,7 +9,7 @@ const planRoutes = require('@routes/planRoutes');
 const therapeuticSituationRoutes = require('@routes/therapeuticSituationRoutes')
 const providerRoute = require('@routes/providerRoute');
 const specialtyRoute = require('@routes/specialtyRoute');
-const agendaRoute = require('@routes/agendaRoute'); // 👈 Nueva ruta
+const agendaRoute = require('@routes/agendaRoute');
 const reportRoutes = require('@routes/reportRoutes');
 
 //task
@@ -25,7 +25,7 @@ app.use("/api", therapeuticSituationRoutes)
 app.use("/api", reportRoutes);
 app.use("/api", providerRoute);
 app.use("/api", specialtyRoute);
-app.use("/api", agendaRoute); // 👈 Registrar ruta de agendas
+app.use("/api", agendaRoute);
 
 const PORT = process.env.PORT || 3000;
 
