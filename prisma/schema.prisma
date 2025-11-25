@@ -10,7 +10,6 @@ datasource db {
 model Plan {
   idPlan          Int             @id @default(autoincrement())
   nombre          String          @db.VarChar(25)
-
   gruposFamiliares GrupoFamiliar[]
 }
 
@@ -18,7 +17,6 @@ model GrupoFamiliar {
   idGrupoFamiliar Int          @id @default(autoincrement())
   nroAfiliado     String       @db.VarChar(25)
   idPlanFK        Int
-
   plan       Plan        @relation(fields: [idPlanFK], references: [idPlan])
   afiliados  Afiliado[]
 }
@@ -27,7 +25,6 @@ model Afiliado {
   dni                 String         @db.VarChar(25) @id
   idGrupoFamiliarFK   Int
   grupoFamiliar       GrupoFamiliar  @relation(fields: [idGrupoFamiliarFK], references: [idGrupoFamiliar])
-
   nombre              String         @db.VarChar(25)
   apellido            String         @db.VarChar(25)
   parentesco          String         @db.VarChar(25)
@@ -38,7 +35,6 @@ model Afiliado {
   fecha_alta          DateTime?
   esta_activo         Boolean        @default(true)
   es_programada       Boolean        @default(false)
-
   emails              AfiliadoEmail[]
   telefonos           AfiliadoTelefono[]
   situaciones         SituacionAfiliado[]
@@ -49,9 +45,7 @@ model AfiliadoEmail {
   dniFK      String   @db.VarChar(25)
   email      String   @db.VarChar(50)
   esta_activo         Boolean        @default(true)
-  
   afiliado   Afiliado @relation(fields: [dniFK], references: [dni])
-
   @@unique([dniFK, email])
 }
 
@@ -60,9 +54,7 @@ model AfiliadoTelefono {
   dniFK      String   @db.VarChar(25)
   telefono   String   @db.VarChar(25)
   esta_activo         Boolean        @default(true)
-  
   afiliado   Afiliado @relation(fields: [dniFK], references: [dni])
-
   @@unique([dniFK, telefono])
 }
 
@@ -73,7 +65,6 @@ model SituacionAfiliado {
   fechaInicio         DateTime
   fechaFin            DateTime?
   esta_activo         Boolean   @default(true)
-
   situacionTerapeutica SituacionTerapeutica @relation(fields: [idSituacionFK], references: [idSituacion])
   afiliado             Afiliado             @relation(fields: [dniFK], references: [dni])
 }
@@ -81,7 +72,6 @@ model SituacionAfiliado {
 model SituacionTerapeutica {
   idSituacion  Int                 @id @default(autoincrement())
   nombre       String              @db.VarChar(100)
-
   situacionesAfiliados SituacionAfiliado[]
 }
 
@@ -108,7 +98,7 @@ model Prestador {
   centroMedicoId  String?                @db.VarChar(25)
   centroMedico    Prestador?             @relation("CentroMedicoRelation", fields: [centroMedicoId], references: [cuitCuil])
   profesionales   Prestador[]            @relation("CentroMedicoRelation")
-  lugaresAtencion LugarAtencion[]        // Relación One-to-Many: un prestador, muchos lugares
+  lugaresAtencion LugarAtencion[]
   telefonos       TelefonoPrestador[]
   mails           MailPrestador[]
   especialidades  PrestadorEspecialidad[]
@@ -124,6 +114,7 @@ model LugarAtencion {
   cuitCuilFK    String?            @db.VarChar(25)
   prestador     Prestador?         @relation(fields: [cuitCuilFK], references: [cuitCuil])
   horarios      HorarioAtencion[]
+  agendas       Agenda[]           // Una agenda está vinculada a un lugar específico
 }
 
 model TelefonoPrestador {
@@ -165,13 +156,37 @@ model HorarioAtencion {
   lugar         LugarAtencion         @relation(fields: [idLugarFK], references: [idLugar])
 }
 
+// Modelo de Agenda mejorado
 model Agenda {
   idAgenda         Int                @id @default(autoincrement())
   cuitCuilFK       String             @db.VarChar(25)
   idEspecialidadFK Int
-  fechaInicio      DateTime
+  idLugarFK        Int                // Referencia al lugar específico
+  fechaInicio      DateTime           @default(now())
   fechaFin         DateTime?
-  duracionTurno    Int
+  duracionTurno    Int                // En minutos
+  esta_activo      Boolean            @default(true)
+  
+  // Relaciones
   prestador        Prestador          @relation(fields: [cuitCuilFK], references: [cuitCuil])
   especialidad     Especialidad       @relation(fields: [idEspecialidadFK], references: [idEspecialidad])
+  lugar            LugarAtencion      @relation(fields: [idLugarFK], references: [idLugar])
+  bloques          BloqueHorarioAgenda[]
+  
+  @@index([cuitCuilFK])
+  @@index([idEspecialidadFK])
+  @@index([idLugarFK])
+}
+
+// Nueva tabla para los bloques horarios de una agenda
+model BloqueHorarioAgenda {
+  idBloque      Int        @id @default(autoincrement())
+  idAgendaFK    Int
+  diaSemana     DiaSemana
+  horaDesde     String     @db.VarChar(5)
+  horaHasta     String     @db.VarChar(5)
+  
+  agenda        Agenda     @relation(fields: [idAgendaFK], references: [idAgenda], onDelete: Cascade)
+  
+  @@index([idAgendaFK])
 }
