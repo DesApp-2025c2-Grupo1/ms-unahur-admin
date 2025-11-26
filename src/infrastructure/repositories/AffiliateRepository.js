@@ -6,7 +6,33 @@ const TITULAR = 'Titular';
 class AffiliateRepository2 {
     async findAll() {
         return prisma.afiliado.findMany({
-            where: { parentesco: TITULAR, esta_activo: true },
+            where: {
+                parentesco: TITULAR,
+                fecha_alta: { lte: new Date() }
+            },
+            include: {
+                situaciones: {
+                    include: {
+                        situacionTerapeutica: true,
+                    },
+                },
+                emails: {
+                    where: { esta_activo: true },
+                },
+                grupoFamiliar: { select: { plan: true } },
+                telefonos: {
+                    where: { esta_activo: true }
+                }
+            }
+        });
+    }
+
+    async findPending() {
+        return prisma.afiliado.findMany({
+            where: {
+                parentesco: TITULAR,
+                fecha_alta: { gt: new Date() }
+            },
             include: {
                 situaciones: {
                     include: {
@@ -28,8 +54,7 @@ class AffiliateRepository2 {
         return prisma.afiliado.findFirst({
             where: {
                 dni,
-                // ❌ REMOVIDO: parentesco: TITULAR,
-                esta_activo: true,
+                fecha_alta: { lte: new Date() }
             },
             include: {
                 situaciones: {
@@ -64,7 +89,7 @@ class AffiliateRepository2 {
         return prisma.afiliado.findMany({
             where: {
                 idGrupoFamiliarFK: groupId,
-                esta_activo: true
+                fecha_alta: { lte: new Date() }
             },
             include: {
                 situaciones: {
@@ -265,7 +290,6 @@ class AffiliateRepository2 {
                 es_programada: !esAltaInmediata,
                 fecha_alta: fechaAltaFinal,
                 tipoDocumento: 'DNI',
-                esta_activo: esAltaInmediata, // ✅ true si es inmediata, false si es programada
                 fecha_nacimiento: this.parseDate(affiliate.fecha_nacimiento),
                 grupoFamiliar: familyGroupId
                     ? { connect: { idGrupoFamiliar: familyGroupId } }
@@ -326,9 +350,10 @@ class AffiliateRepository2 {
     }
 
     async delete(dniList) {
+        // Marcar como eliminados seteando fecha_alta a null
         return prisma.afiliado.updateMany({
-            where: { dni: { in: dniList }, esta_activo: true },
-            data: { esta_activo: false }
+            where: { dni: { in: dniList } },
+            data: { fecha_alta: null }
         });
     }
 
@@ -567,7 +592,7 @@ class AffiliateRepository2 {
         return prisma.afiliado.count({
             where: {
                 parentesco: TITULAR,
-                esta_activo: true
+                fecha_alta: { lte: new Date() }
             }
         });
     }
@@ -589,7 +614,7 @@ class AffiliateRepository2 {
         return prisma.afiliado.count({
             where: {
                 idGrupoFamiliarFK: groupId,
-                esta_activo: true
+                fecha_alta: { lte: new Date() }
             }
         });
     }
