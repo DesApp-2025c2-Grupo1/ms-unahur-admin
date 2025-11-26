@@ -15,8 +15,8 @@ CREATE TABLE "Plan" (
 -- CreateTable
 CREATE TABLE "GrupoFamiliar" (
     "idGrupoFamiliar" SERIAL NOT NULL,
-    "idPlanFK" INTEGER NOT NULL,
     "nroAfiliado" VARCHAR(25) NOT NULL,
+    "idPlanFK" INTEGER NOT NULL,
 
     CONSTRAINT "GrupoFamiliar_pkey" PRIMARY KEY ("idGrupoFamiliar")
 );
@@ -31,9 +31,8 @@ CREATE TABLE "Afiliado" (
     "credencial" VARCHAR(25) NOT NULL,
     "direccion" VARCHAR(50) NOT NULL,
     "tipoDocumento" VARCHAR(5) NOT NULL,
-    "fecha_alta" TIMESTAMP(3),
-    "fecha_nacimiento" TIMESTAMP(3),
-    "esta_activo" BOOLEAN NOT NULL DEFAULT true,
+    "fecha_nacimiento" TIMESTAMPTZ,
+    "fecha_alta" TIMESTAMPTZ,
     "es_programada" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "Afiliado_pkey" PRIMARY KEY ("dni")
@@ -62,10 +61,10 @@ CREATE TABLE "AfiliadoTelefono" (
 -- CreateTable
 CREATE TABLE "SituacionAfiliado" (
     "idSituacionAfiliado" SERIAL NOT NULL,
-    "dniFK" VARCHAR(25) NOT NULL,
-    "fechaFin" TIMESTAMP(3),
-    "fechaInicio" TIMESTAMP(3) NOT NULL,
     "idSituacionFK" INTEGER NOT NULL,
+    "dniFK" VARCHAR(25) NOT NULL,
+    "fechaInicio" TIMESTAMP(3) NOT NULL,
+    "fechaFin" TIMESTAMP(3),
     "esta_activo" BOOLEAN NOT NULL DEFAULT true,
 
     CONSTRAINT "SituacionAfiliado_pkey" PRIMARY KEY ("idSituacionAfiliado")
@@ -84,8 +83,8 @@ CREATE TABLE "Prestador" (
     "cuitCuil" VARCHAR(25) NOT NULL,
     "nombreCompleto" VARCHAR(100) NOT NULL,
     "tipoPrestador" "TipoPrestador" NOT NULL,
-    "centroMedicoId" VARCHAR(25),
     "fechaAlta" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "centroMedicoId" VARCHAR(25),
 
     CONSTRAINT "Prestador_pkey" PRIMARY KEY ("cuitCuil")
 );
@@ -153,11 +152,11 @@ CREATE TABLE "Agenda" (
     "idAgenda" SERIAL NOT NULL,
     "cuitCuilFK" VARCHAR(25) NOT NULL,
     "idEspecialidadFK" INTEGER NOT NULL,
+    "idLugarFK" INTEGER NOT NULL,
     "fechaInicio" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "fechaFin" TIMESTAMP(3),
     "duracionTurno" INTEGER NOT NULL,
     "esta_activo" BOOLEAN NOT NULL DEFAULT true,
-    "idLugarFK" INTEGER NOT NULL,
 
     CONSTRAINT "Agenda_pkey" PRIMARY KEY ("idAgenda")
 );
@@ -207,10 +206,10 @@ ALTER TABLE "AfiliadoEmail" ADD CONSTRAINT "AfiliadoEmail_dniFK_fkey" FOREIGN KE
 ALTER TABLE "AfiliadoTelefono" ADD CONSTRAINT "AfiliadoTelefono_dniFK_fkey" FOREIGN KEY ("dniFK") REFERENCES "Afiliado"("dni") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "SituacionAfiliado" ADD CONSTRAINT "SituacionAfiliado_dniFK_fkey" FOREIGN KEY ("dniFK") REFERENCES "Afiliado"("dni") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "SituacionAfiliado" ADD CONSTRAINT "SituacionAfiliado_idSituacionFK_fkey" FOREIGN KEY ("idSituacionFK") REFERENCES "SituacionTerapeutica"("idSituacion") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "SituacionAfiliado" ADD CONSTRAINT "SituacionAfiliado_idSituacionFK_fkey" FOREIGN KEY ("idSituacionFK") REFERENCES "SituacionTerapeutica"("idSituacion") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "SituacionAfiliado" ADD CONSTRAINT "SituacionAfiliado_dniFK_fkey" FOREIGN KEY ("dniFK") REFERENCES "Afiliado"("dni") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Prestador" ADD CONSTRAINT "Prestador_centroMedicoId_fkey" FOREIGN KEY ("centroMedicoId") REFERENCES "Prestador"("cuitCuil") ON DELETE SET NULL ON UPDATE CASCADE;
