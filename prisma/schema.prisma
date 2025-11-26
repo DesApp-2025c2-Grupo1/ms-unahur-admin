@@ -15,8 +15,8 @@ model Plan {
 
 model GrupoFamiliar {
   idGrupoFamiliar Int        @id @default(autoincrement())
-  idPlanFK        Int
   nroAfiliado     String     @db.VarChar(25)
+  idPlanFK        Int
   afiliados       Afiliado[]
   plan            Plan       @relation(fields: [idPlanFK], references: [idPlan])
 }
@@ -30,9 +30,8 @@ model Afiliado {
   credencial        String              @db.VarChar(25)
   direccion         String              @db.VarChar(50)
   tipoDocumento     String              @db.VarChar(5)
-  fecha_alta        DateTime?
-  fecha_nacimiento  DateTime?
-  esta_activo       Boolean             @default(true)
+  fecha_nacimiento  DateTime?           @db.Timestamptz(6)
+  fecha_alta        DateTime?           @db.Timestamptz(6)
   es_programada     Boolean             @default(false)
   grupoFamiliar     GrupoFamiliar       @relation(fields: [idGrupoFamiliarFK], references: [idGrupoFamiliar])
   emails            AfiliadoEmail[]
@@ -62,10 +61,10 @@ model AfiliadoTelefono {
 
 model SituacionAfiliado {
   idSituacionAfiliado  Int                  @id @default(autoincrement())
-  dniFK                String               @db.VarChar(25)
-  fechaFin             DateTime?
-  fechaInicio          DateTime
   idSituacionFK        Int
+  dniFK                String               @db.VarChar(25)
+  fechaInicio          DateTime
+  fechaFin             DateTime?
   esta_activo          Boolean              @default(true)
   afiliado             Afiliado             @relation(fields: [dniFK], references: [dni])
   situacionTerapeutica SituacionTerapeutica @relation(fields: [idSituacionFK], references: [idSituacion])
@@ -81,8 +80,8 @@ model Prestador {
   cuitCuil        String                  @id @db.VarChar(25)
   nombreCompleto  String                  @db.VarChar(100)
   tipoPrestador   TipoPrestador
-  centroMedicoId  String?                 @db.VarChar(25)
   fechaAlta       DateTime                @default(now())
+  centroMedicoId  String?                 @db.VarChar(25)
   agendas         Agenda[]
   lugaresAtencion LugarAtencion[]
   mails           MailPrestador[]
@@ -148,11 +147,11 @@ model Agenda {
   idAgenda         Int                   @id @default(autoincrement())
   cuitCuilFK       String                @db.VarChar(25)
   idEspecialidadFK Int
+  idLugarFK        Int
   fechaInicio      DateTime              @default(now())
   fechaFin         DateTime?
   duracionTurno    Int
   esta_activo      Boolean               @default(true)
-  idLugarFK        Int
   prestador        Prestador             @relation(fields: [cuitCuilFK], references: [cuitCuil])
   especialidad     Especialidad          @relation(fields: [idEspecialidadFK], references: [idEspecialidad])
   lugar            LugarAtencion         @relation(fields: [idLugarFK], references: [idLugar])
