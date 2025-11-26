@@ -8,71 +8,170 @@ datasource db {
 }
 
 model Plan {
-  idPlan          Int             @id @default(autoincrement())
-  nombre          String          @db.VarChar(25)
+  idPlan           Int             @id @default(autoincrement())
+  nombre           String          @db.VarChar(25)
   gruposFamiliares GrupoFamiliar[]
 }
 
 model GrupoFamiliar {
-  idGrupoFamiliar Int          @id @default(autoincrement())
-  nroAfiliado     String       @db.VarChar(25)
+  idGrupoFamiliar Int        @id @default(autoincrement())
   idPlanFK        Int
-  plan       Plan        @relation(fields: [idPlanFK], references: [idPlan])
-  afiliados  Afiliado[]
+  nroAfiliado     String     @db.VarChar(25)
+  afiliados       Afiliado[]
+  plan            Plan       @relation(fields: [idPlanFK], references: [idPlan])
 }
 
 model Afiliado {
-  dni                 String         @db.VarChar(25) @id
-  idGrupoFamiliarFK   Int
-  grupoFamiliar       GrupoFamiliar  @relation(fields: [idGrupoFamiliarFK], references: [idGrupoFamiliar])
-  nombre              String         @db.VarChar(25)
-  apellido            String         @db.VarChar(25)
-  parentesco          String         @db.VarChar(25)
-  credencial          String         @db.VarChar(25)
-  direccion           String         @db.VarChar(50)
-  tipoDocumento       String         @db.VarChar(5)
-  fecha_nacimiento    DateTime?
-  fecha_alta          DateTime?
-  esta_activo         Boolean        @default(true)
-  es_programada       Boolean        @default(false)
-  emails              AfiliadoEmail[]
-  telefonos           AfiliadoTelefono[]
-  situaciones         SituacionAfiliado[]
+  dni               String              @id @db.VarChar(25)
+  idGrupoFamiliarFK Int
+  nombre            String              @db.VarChar(25)
+  apellido          String              @db.VarChar(25)
+  parentesco        String              @db.VarChar(25)
+  credencial        String              @db.VarChar(25)
+  direccion         String              @db.VarChar(50)
+  tipoDocumento     String              @db.VarChar(5)
+  fecha_alta        DateTime?
+  fecha_nacimiento  DateTime?
+  esta_activo       Boolean             @default(true)
+  es_programada     Boolean             @default(false)
+  grupoFamiliar     GrupoFamiliar       @relation(fields: [idGrupoFamiliarFK], references: [idGrupoFamiliar])
+  emails            AfiliadoEmail[]
+  telefonos         AfiliadoTelefono[]
+  situaciones       SituacionAfiliado[]
 }
 
 model AfiliadoEmail {
-  id         Int      @id @default(autoincrement())
-  dniFK      String   @db.VarChar(25)
-  email      String   @db.VarChar(50)
-  esta_activo         Boolean        @default(true)
-  afiliado   Afiliado @relation(fields: [dniFK], references: [dni])
+  id          Int      @id @default(autoincrement())
+  dniFK       String   @db.VarChar(25)
+  email       String   @db.VarChar(50)
+  esta_activo Boolean  @default(true)
+  afiliado    Afiliado @relation(fields: [dniFK], references: [dni])
+
   @@unique([dniFK, email])
 }
 
 model AfiliadoTelefono {
-  id         Int      @id @default(autoincrement())
-  dniFK      String   @db.VarChar(25)
-  telefono   String   @db.VarChar(25)
-  esta_activo         Boolean        @default(true)
-  afiliado   Afiliado @relation(fields: [dniFK], references: [dni])
+  id          Int      @id @default(autoincrement())
+  dniFK       String   @db.VarChar(25)
+  telefono    String   @db.VarChar(25)
+  esta_activo Boolean  @default(true)
+  afiliado    Afiliado @relation(fields: [dniFK], references: [dni])
+
   @@unique([dniFK, telefono])
 }
 
 model SituacionAfiliado {
-  idSituacionAfiliado Int       @id @default(autoincrement())
-  idSituacionFK       Int
-  dniFK               String    @db.VarChar(25)
-  fechaInicio         DateTime
-  fechaFin            DateTime?
-  esta_activo         Boolean   @default(true)
-  situacionTerapeutica SituacionTerapeutica @relation(fields: [idSituacionFK], references: [idSituacion])
+  idSituacionAfiliado  Int                  @id @default(autoincrement())
+  dniFK                String               @db.VarChar(25)
+  fechaFin             DateTime?
+  fechaInicio          DateTime
+  idSituacionFK        Int
+  esta_activo          Boolean              @default(true)
   afiliado             Afiliado             @relation(fields: [dniFK], references: [dni])
+  situacionTerapeutica SituacionTerapeutica @relation(fields: [idSituacionFK], references: [idSituacion])
 }
 
 model SituacionTerapeutica {
-  idSituacion  Int                 @id @default(autoincrement())
-  nombre       String              @db.VarChar(100)
+  idSituacion          Int                 @id @default(autoincrement())
+  nombre               String              @db.VarChar(100)
   situacionesAfiliados SituacionAfiliado[]
+}
+
+model Prestador {
+  cuitCuil        String                  @id @db.VarChar(25)
+  nombreCompleto  String                  @db.VarChar(100)
+  tipoPrestador   TipoPrestador
+  centroMedicoId  String?                 @db.VarChar(25)
+  fechaAlta       DateTime                @default(now())
+  agendas         Agenda[]
+  lugaresAtencion LugarAtencion[]
+  mails           MailPrestador[]
+  centroMedico    Prestador?              @relation("CentroMedicoRelation", fields: [centroMedicoId], references: [cuitCuil])
+  profesionales   Prestador[]             @relation("CentroMedicoRelation")
+  especialidades  PrestadorEspecialidad[]
+  telefonos       TelefonoPrestador[]
+}
+
+model LugarAtencion {
+  idLugar      Int               @id @default(autoincrement())
+  direccion    String            @db.VarChar(100)
+  localidad    String            @db.VarChar(50)
+  codigoPostal String            @db.VarChar(15)
+  provincia    String            @db.VarChar(50)
+  cuitCuilFK   String?           @db.VarChar(25)
+  agendas      Agenda[]
+  horarios     HorarioAtencion[]
+  prestador    Prestador?        @relation(fields: [cuitCuilFK], references: [cuitCuil])
+}
+
+model TelefonoPrestador {
+  idTelefono Int       @id @default(autoincrement())
+  cuitCuilFK String    @db.VarChar(25)
+  telefono   String    @db.VarChar(25)
+  prestador  Prestador @relation(fields: [cuitCuilFK], references: [cuitCuil])
+}
+
+model MailPrestador {
+  idMail     Int       @id @default(autoincrement())
+  cuitCuilFK String    @db.VarChar(25)
+  mail       String    @db.VarChar(50)
+  prestador  Prestador @relation(fields: [cuitCuilFK], references: [cuitCuil])
+}
+
+model Especialidad {
+  idEspecialidad Int                     @id @default(autoincrement())
+  nombre         String                  @db.VarChar(100)
+  agendas        Agenda[]
+  prestadores    PrestadorEspecialidad[]
+}
+
+model PrestadorEspecialidad {
+  id               Int          @id @default(autoincrement())
+  cuitCuilFK       String       @db.VarChar(25)
+  idEspecialidadFK Int
+  prestador        Prestador    @relation(fields: [cuitCuilFK], references: [cuitCuil])
+  especialidad     Especialidad @relation(fields: [idEspecialidadFK], references: [idEspecialidad])
+
+  @@unique([cuitCuilFK, idEspecialidadFK])
+}
+
+model HorarioAtencion {
+  idHorario Int           @id @default(autoincrement())
+  idLugarFK Int
+  diaSemana DiaSemana
+  horaDesde String        @db.VarChar(5)
+  horaHasta String        @db.VarChar(5)
+  lugar     LugarAtencion @relation(fields: [idLugarFK], references: [idLugar])
+}
+
+model Agenda {
+  idAgenda         Int                   @id @default(autoincrement())
+  cuitCuilFK       String                @db.VarChar(25)
+  idEspecialidadFK Int
+  fechaInicio      DateTime              @default(now())
+  fechaFin         DateTime?
+  duracionTurno    Int
+  esta_activo      Boolean               @default(true)
+  idLugarFK        Int
+  prestador        Prestador             @relation(fields: [cuitCuilFK], references: [cuitCuil])
+  especialidad     Especialidad          @relation(fields: [idEspecialidadFK], references: [idEspecialidad])
+  lugar            LugarAtencion         @relation(fields: [idLugarFK], references: [idLugar])
+  bloques          BloqueHorarioAgenda[]
+
+  @@index([cuitCuilFK])
+  @@index([idEspecialidadFK])
+  @@index([idLugarFK])
+}
+
+model BloqueHorarioAgenda {
+  idBloque   Int       @id @default(autoincrement())
+  idAgendaFK Int
+  diaSemana  DiaSemana
+  horaDesde  String    @db.VarChar(5)
+  horaHasta  String    @db.VarChar(5)
+  agenda     Agenda    @relation(fields: [idAgendaFK], references: [idAgenda], onDelete: Cascade)
+
+  @@index([idAgendaFK])
 }
 
 enum TipoPrestador {
@@ -88,105 +187,4 @@ enum DiaSemana {
   Viernes
   Sabado
   Domingo
-}
-
-model Prestador {
-  cuitCuil        String                 @id @db.VarChar(25)
-  nombreCompleto  String                 @db.VarChar(100)
-  tipoPrestador   TipoPrestador
-  fechaAlta       DateTime @default(now())
-  centroMedicoId  String?                @db.VarChar(25)
-  centroMedico    Prestador?             @relation("CentroMedicoRelation", fields: [centroMedicoId], references: [cuitCuil])
-  profesionales   Prestador[]            @relation("CentroMedicoRelation")
-  lugaresAtencion LugarAtencion[]
-  telefonos       TelefonoPrestador[]
-  mails           MailPrestador[]
-  especialidades  PrestadorEspecialidad[]
-  agendas         Agenda[]
-}
-
-model LugarAtencion {
-  idLugar       Int                @id @default(autoincrement())
-  direccion     String             @db.VarChar(100)
-  localidad     String             @db.VarChar(50)
-  codigoPostal  String             @db.VarChar(15)
-  provincia     String             @db.VarChar(50)
-  cuitCuilFK    String?            @db.VarChar(25)
-  prestador     Prestador?         @relation(fields: [cuitCuilFK], references: [cuitCuil])
-  horarios      HorarioAtencion[]
-  agendas       Agenda[]           // Una agenda está vinculada a un lugar específico
-}
-
-model TelefonoPrestador {
-  idTelefono   Int             @id @default(autoincrement())
-  cuitCuilFK   String          @db.VarChar(25)
-  telefono     String          @db.VarChar(25)
-  prestador    Prestador       @relation(fields: [cuitCuilFK], references: [cuitCuil])
-}
-
-model MailPrestador {
-  idMail       Int             @id @default(autoincrement())
-  cuitCuilFK   String          @db.VarChar(25)
-  mail         String          @db.VarChar(50)
-  prestador    Prestador       @relation(fields: [cuitCuilFK], references: [cuitCuil])
-}
-
-model Especialidad {
-  idEspecialidad  Int                   @id @default(autoincrement())
-  nombre          String                @db.VarChar(100)
-  prestadores     PrestadorEspecialidad[]
-  agendas         Agenda[]
-}
-
-model PrestadorEspecialidad {
-  id               Int                  @id @default(autoincrement())
-  cuitCuilFK       String               @db.VarChar(25)
-  idEspecialidadFK Int
-  prestador        Prestador            @relation(fields: [cuitCuilFK], references: [cuitCuil])
-  especialidad     Especialidad         @relation(fields: [idEspecialidadFK], references: [idEspecialidad])
-  @@unique([cuitCuilFK, idEspecialidadFK])
-}
-
-model HorarioAtencion {
-  idHorario     Int                   @id @default(autoincrement())
-  idLugarFK     Int
-  diaSemana     DiaSemana
-  horaDesde     String                @db.VarChar(5)
-  horaHasta     String                @db.VarChar(5)
-  lugar         LugarAtencion         @relation(fields: [idLugarFK], references: [idLugar])
-}
-
-// Modelo de Agenda mejorado
-model Agenda {
-  idAgenda         Int                @id @default(autoincrement())
-  cuitCuilFK       String             @db.VarChar(25)
-  idEspecialidadFK Int
-  idLugarFK        Int                // Referencia al lugar específico
-  fechaInicio      DateTime           @default(now())
-  fechaFin         DateTime?
-  duracionTurno    Int                // En minutos
-  esta_activo      Boolean            @default(true)
-  
-  // Relaciones
-  prestador        Prestador          @relation(fields: [cuitCuilFK], references: [cuitCuil])
-  especialidad     Especialidad       @relation(fields: [idEspecialidadFK], references: [idEspecialidad])
-  lugar            LugarAtencion      @relation(fields: [idLugarFK], references: [idLugar])
-  bloques          BloqueHorarioAgenda[]
-  
-  @@index([cuitCuilFK])
-  @@index([idEspecialidadFK])
-  @@index([idLugarFK])
-}
-
-// Nueva tabla para los bloques horarios de una agenda
-model BloqueHorarioAgenda {
-  idBloque      Int        @id @default(autoincrement())
-  idAgendaFK    Int
-  diaSemana     DiaSemana
-  horaDesde     String     @db.VarChar(5)
-  horaHasta     String     @db.VarChar(5)
-  
-  agenda        Agenda     @relation(fields: [idAgendaFK], references: [idAgenda], onDelete: Cascade)
-  
-  @@index([idAgendaFK])
 }

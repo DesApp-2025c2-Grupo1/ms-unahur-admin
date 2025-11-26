@@ -20,6 +20,19 @@ class AffiliateController {
         }
     }
 
+    async findPending(req, res) {
+        try {
+            const affiliates = await this.service.findPending();
+            return res.status(200).json({
+                affiliates: this.mapper.mapList(affiliates)
+            });
+        } catch (error) {
+            return res.status(500).json({
+                error: error.message || 'Error interno del servidor'
+            });
+        }
+    }
+
     async getAffiliateByDni(req, res) {
         try {
             const { dni } = req.params;
@@ -49,27 +62,27 @@ class AffiliateController {
     }
 
     async update(req, res) {
-    try {
-        const { dni } = req.params;
-        const data = req.body;
-        
-        console.log("Controller - DNI:", dni);
-        console.log("Controller - Datos recibidos:", JSON.stringify(data, null, 2));
-        
-        const updated = await this.service.updateAffiliate(dni, data);
-        
-        console.log("Controller - Actualización exitosa");
-        
-        return res.status(200).json({
-            affiliate: this.mapper.map(updated)
-        });
-    } catch (error) {
-        console.error("Controller - Error:", error);
-        return res.status(500).json({
-            error: error.message || 'Error al editar el afiliado'
-        });
+        try {
+            const { dni } = req.params;
+            const data = req.body;
+
+            console.log("Controller - DNI:", dni);
+            console.log("Controller - Datos recibidos:", JSON.stringify(data, null, 2));
+
+            const updated = await this.service.updateAffiliate(dni, data);
+
+            console.log("Controller - Actualización exitosa");
+
+            return res.status(200).json({
+                affiliate: this.mapper.map(updated)
+            });
+        } catch (error) {
+            console.error("Controller - Error:", error);
+            return res.status(500).json({
+                error: error.message || 'Error al editar el afiliado'
+            });
+        }
     }
-}
 
 
 
@@ -89,9 +102,9 @@ class AffiliateController {
         try {
             const { dni } = req.params;
             console.log('🗑️ Controller - Eliminando miembro del grupo familiar con DNI:', dni);
-            
+
             const result = await this.service.deleteFamilyMember(dni);
-            
+
             return res.status(200).json(result);
         } catch (error) {
             console.error('❌ Controller - Error al eliminar miembro:', error);
@@ -150,7 +163,7 @@ class AffiliateController {
             console.log('📥 Controller - Datos del familiar:', familyData);
 
             const newMember = await this.service.addFamilyMember(dni, familyData);
-            
+
             return res.status(201).json({
                 message: 'Familiar agregado exitosamente',
                 affiliate: this.mapper.map(newMember)
