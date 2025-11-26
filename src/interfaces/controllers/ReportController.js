@@ -20,13 +20,7 @@ class ReportController {
                     fecha_alta: {
                         gte: new Date(from),
                         lte: new Date(to)
-                    },
-                    esta_activo: true, // Solo afiliados activos (altas ya efectivas)
-                    // O si quieres incluir también los programados:
-                    // OR: [
-                    //     { esta_activo: true },
-                    //     { es_programada: true }
-                    // ]
+                    }
                 },
                 include: {
                     grupoFamiliar: {
@@ -44,7 +38,7 @@ class ReportController {
                 apellido: r.apellido,
                 plan: r.grupoFamiliar?.plan?.nombre || 'N/A',
                 fechaAlta: r.fecha_alta,
-                estado: r.es_programada ? 'Programada' : 'Activa' // Opcional: mostrar el estado
+                estado: r.es_programada ? 'Programada' : 'Activa'
             }));
 
             return res.status(200).json(formatted);
@@ -228,7 +222,6 @@ class ReportController {
                 where: { dni },
                 include: {
                     situaciones: {
-                        where: { esta_activo: true },
                         include: {
                             situacionTerapeutica: true
                         },
@@ -295,12 +288,10 @@ class ReportController {
             // Obtener todos los miembros del grupo con sus situaciones
             const miembros = await prisma.afiliado.findMany({
                 where: {
-                    idGrupoFamiliarFK: afiliado.idGrupoFamiliarFK,
-                    esta_activo: true
+                    idGrupoFamiliarFK: afiliado.idGrupoFamiliarFK
                 },
                 include: {
                     situaciones: {
-                        where: { esta_activo: true },
                         include: {
                             situacionTerapeutica: true
                         },
