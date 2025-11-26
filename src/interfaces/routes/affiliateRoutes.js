@@ -8,6 +8,7 @@ const router = express.Router();
 const controller = new AffiliateController();
 
 router.get("/affiliates", (req, res) => controller.findAll(req, res));
+router.get("/affiliates/pending", (req, res) => controller.findPending(req, res));
 router.post("/affiliates", (req, res) => controller.create(req, res));
 router.get("/affiliates/family/:dni", (req, res) => controller.getFamilyGroup(req, res));
 router.post("/affiliates/family/:dni", (req, res) => controller.addFamilyMember(req, res));

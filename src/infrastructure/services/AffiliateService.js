@@ -21,6 +21,11 @@ class AffiliateService {
         return this.repo.findAll();
     }
 
+    // Listar afiliados pendientes (fecha_alta futura)
+    findPending() {
+        return this.repo.findPending();
+    }
+
     async getAffiliateByDni(dni) {
         const affiliate = await this.repo.getAffiliateByDni(dni);
         console.log(affiliate);
@@ -51,17 +56,17 @@ class AffiliateService {
 
     // Modificar afiliado
     async updateAffiliate(dni, data) {
-    console.log("🔧 Service - Datos que llegan:", {
-        dni,
-        situaciones: data.situaciones,
-        situacionesEliminadas: data.situacionesEliminadas
-    });
-    
-    const updated = await this.repo.update(dni, data);
-    
-    console.log("Service - Actualización completada");
-    return updated;
-}
+        console.log("🔧 Service - Datos que llegan:", {
+            dni,
+            situaciones: data.situaciones,
+            situacionesEliminadas: data.situacionesEliminadas
+        });
+
+        const updated = await this.repo.update(dni, data);
+
+        console.log("Service - Actualización completada");
+        return updated;
+    }
 
 
 
@@ -133,7 +138,7 @@ class AffiliateService {
         });
 
         await this.deleteAffiliateAndRelatedData([dni]);
-        
+
         return { message: `Afiliado ${affiliate.nombre} ${affiliate.apellido} eliminado correctamente` };
     }
 
