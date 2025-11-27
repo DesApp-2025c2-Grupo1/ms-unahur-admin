@@ -53,8 +53,7 @@ class AffiliateRepository2 {
     async getAffiliateByDni(dni) {
         return prisma.afiliado.findFirst({
             where: {
-                dni,
-                fecha_alta: { lte: new Date() }
+                dni
             },
             include: {
                 situaciones: {
@@ -88,8 +87,7 @@ class AffiliateRepository2 {
     async getFamily(groupId) {
         return prisma.afiliado.findMany({
             where: {
-                idGrupoFamiliarFK: groupId,
-                fecha_alta: { lte: new Date() }
+                idGrupoFamiliarFK: groupId
             },
             include: {
                 situaciones: {
