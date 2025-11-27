@@ -589,8 +589,7 @@ class AffiliateRepository2 {
     async getCount() {
         return prisma.afiliado.count({
             where: {
-                parentesco: TITULAR,
-                fecha_alta: { lte: new Date() }
+                parentesco: TITULAR
             }
         });
     }
