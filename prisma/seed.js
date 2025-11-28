@@ -33,10 +33,7 @@ const situacionesTerapeuticas = [
 ];
 
 async function main() {
-  console.log('🌱 Iniciando seed de la base de datos...');
-
   // Seed de planes
-  console.log('📋 Insertando planes...');
   for (const plan of planes) {
     await prisma.plan.upsert({
       where: { idPlan: plan.idPlan },
@@ -44,10 +41,8 @@ async function main() {
       create: plan,
     });
   }
-  console.log(`✅ ${planes.length} planes insertados/actualizados`);
 
   // Seed de especialidades
-  console.log('📋 Insertando especialidades...');
   for (const especialidad of especialidades) {
     await prisma.especialidad.upsert({
       where: { idEspecialidad: especialidad.idEspecialidad },
@@ -55,10 +50,8 @@ async function main() {
       create: especialidad,
     });
   }
-  console.log(`✅ ${especialidades.length} especialidades insertadas/actualizadas`);
 
   // Seed de situaciones terapéuticas
-  console.log('📋 Insertando situaciones terapéuticas...');
   for (const situacion of situacionesTerapeuticas) {
     await prisma.situacionTerapeutica.upsert({
       where: { idSituacion: situacion.idSituacion },
@@ -66,9 +59,7 @@ async function main() {
       create: situacion,
     });
   }
-  console.log(`✅ ${situacionesTerapeuticas.length} situaciones terapéuticas insertadas/actualizadas`);
 
-  console.log('🎉 Seed completado exitosamente');
 }
 
 main()
@@ -76,7 +67,6 @@ main()
     await prisma.$disconnect();
   })
   .catch(async (e) => {
-    console.error('❌ Error durante el seed:', e);
     await prisma.$disconnect();
     process.exit(1);
   });

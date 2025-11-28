@@ -43,7 +43,6 @@ class ReportController {
 
             return res.status(200).json(formatted);
         } catch (error) {
-            console.error('Error en getAltasAfiliados:', error);
             return res.status(500).json({
                 error: 'Error al obtener altas de afiliados'
             });
@@ -83,7 +82,6 @@ class ReportController {
 
             return res.status(200).json(formatted);
         } catch (error) {
-            console.error('Error en getAltasPrestadores:', error);
             return res.status(500).json({
                 error: 'Error al obtener altas de prestadores'
             });
@@ -130,7 +128,6 @@ class ReportController {
 
             return res.status(200).json(formatted);
         } catch (error) {
-            console.error('Error en getPrestadoresPorEspecialidad:', error);
             return res.status(500).json({
                 error: 'Error al obtener prestadores por especialidad'
             });
@@ -174,7 +171,6 @@ class ReportController {
 
             return res.status(200).json(formatted);
         } catch (error) {
-            console.error('Error en getPrestadoresPorCodigoPostal:', error);
             return res.status(500).json({
                 error: 'Error al obtener prestadores por código postal'
             });
@@ -200,7 +196,6 @@ class ReportController {
 
             return res.status(200).json(formatted);
         } catch (error) {
-            console.error('Error en getPrestadoresSinAgendas:', error);
             return res.status(500).json({
                 error: 'Error al obtener prestadores sin agendas'
             });
@@ -222,6 +217,7 @@ class ReportController {
                 where: { dni },
                 include: {
                     situaciones: {
+                        where: { esta_activo: true },
                         include: {
                             situacionTerapeutica: true
                         },
@@ -249,13 +245,12 @@ class ReportController {
                     situacion: s.situacionTerapeutica?.nombre,
                     fechaInicio: s.fechaInicio,
                     fechaFin: s.fechaFin,
-                    estado: s.fechaFin ? 'Finalizada' : 'Activa'
+                    estado: s.fechaFin && new Date(s.fechaFin) <= new Date() ? 'Finalizada' : 'Activa'
                 }))
             };
 
             return res.status(200).json(formatted);
         } catch (error) {
-            console.error('Error en getSituacionesPorAfiliado:', error);
             return res.status(500).json({
                 error: 'Error al obtener situaciones del afiliado'
             });
@@ -292,6 +287,7 @@ class ReportController {
                 },
                 include: {
                     situaciones: {
+                        where: { esta_activo: true },
                         include: {
                             situacionTerapeutica: true
                         },
@@ -315,13 +311,12 @@ class ReportController {
                     situacion: s.situacionTerapeutica?.nombre,
                     fechaInicio: s.fechaInicio,
                     fechaFin: s.fechaFin,
-                    estado: s.fechaFin ? 'Finalizada' : 'Activa'
+                    estado: s.fechaFin && new Date(s.fechaFin) <= new Date() ? 'Finalizada' : 'Activa'
                 }))
             }));
 
             return res.status(200).json(formatted);
         } catch (error) {
-            console.error('Error en getSituacionesPorGrupo:', error);
             return res.status(500).json({
                 error: 'Error al obtener situaciones del grupo familiar'
             });
