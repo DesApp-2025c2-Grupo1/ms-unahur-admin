@@ -19,7 +19,6 @@ class ProviderRepository {
 
             return prestadores.map(p => mapper.map(p));
         } catch (error) {
-            console.error('Error in ProviderRepository.findAll:', error);
             throw new Error('No se pudieron obtener los prestadores');
         }
     }
@@ -87,19 +86,15 @@ class ProviderRepository {
                 return mapper.map(created);
             });
         } catch (error) {
-            console.error('Error in ProviderRepository.create:', error.message, error);
             throw new Error(`No se pudo crear el prestador: ${error.message}`);
         }
     }
 
     async updateByCuitCuil(cuitCuil, payload) {
         try {
-            console.log(`[ProviderRepository.updateByCuitCuil] Iniciando transacción para ${cuitCuil}`);
             return await prisma.$transaction(async (tx) => {
                 const existing = await tx.prestador.findUnique({ where: { cuitCuil: cuitCuil } });
                 if (!existing) throw new Error('Prestador no encontrado');
-
-                console.log(`[updateByCuitCuil] Prestador encontrado, actualizando campos básicos`);
 
                 // Update basic fields
                 await tx.prestador.update({
@@ -112,21 +107,18 @@ class ProviderRepository {
                 });
 
                 // Replace telefonos
-                console.log(`[updateByCuitCuil] Actualizando telefonos: ${payload.telefonos?.length || 0} registros`);
                 await tx.telefonoPrestador.deleteMany({ where: { cuitCuilFK: cuitCuil } });
                 if (Array.isArray(payload.telefonos) && payload.telefonos.length > 0) {
                     await tx.telefonoPrestador.createMany({ data: payload.telefonos.map(t => ({ cuitCuilFK: cuitCuil, telefono: t })) });
                 }
 
                 // Replace mails
-                console.log(`[updateByCuitCuil] Actualizando mails: ${payload.mails?.length || 0} registros`);
                 await tx.mailPrestador.deleteMany({ where: { cuitCuilFK: cuitCuil } });
                 if (Array.isArray(payload.mails) && payload.mails.length > 0) {
                     await tx.mailPrestador.createMany({ data: payload.mails.map(m => ({ cuitCuilFK: cuitCuil, mail: m })) });
                 }
 
                 // Replace especialidades - Detect removed specialties to delete their agendas
-                console.log(`[updateByCuitCuil] Actualizando especialidades: ${payload.especialidades?.length || 0} registros`);
 
                 // Get current specialties before deletion
                 const especialidadesActuales = await tx.prestadorEspecialidad.findMany({
@@ -140,8 +132,6 @@ class ProviderRepository {
 
                 // Delete agendas ONLY for removed specialties
                 if (especialidadesEliminadas.length > 0) {
-                    console.log(`[updateByCuitCuil] Especialidades eliminadas: ${especialidadesEliminadas.join(', ')}`);
-
                     const lugares = await tx.lugarAtencion.findMany({
                         where: { cuitCuilFK: cuitCuil },
                         select: { idLugar: true }
@@ -156,7 +146,6 @@ class ProviderRepository {
                                 idEspecialidadFK: { in: especialidadesEliminadas }
                             }
                         });
-                        console.log(`[updateByCuitCuil] ⚠️ Agendas eliminadas por especialidades removidas: ${agendasDeleted.count}`);
                     }
                 }
 
@@ -169,7 +158,6 @@ class ProviderRepository {
 
                 // Handle lugaresAtencion update - Only delete agendas if places actually changed
                 if (payload.lugaresAtencion !== undefined) {
-                    console.log(`[updateByCuitCuil] Actualizando lugares de atención: ${payload.lugaresAtencion?.length || 0} registros`);
 
                     // Obtener lugares existentes
                     const lugaresExistentes = await tx.lugarAtencion.findMany({
@@ -200,7 +188,6 @@ class ProviderRepository {
                         });
 
                     if (lugaresChanged) {
-                        console.log(`[updateByCuitCuil] ⚠️ Lugares de atención modificados - eliminando agendas asociadas`);
 
                         const idsLugaresExistentes = lugaresExistentes.map(l => l.idLugar);
 
@@ -210,7 +197,6 @@ class ProviderRepository {
                                 where: { idLugarFK: { in: idsLugaresExistentes } }
                             });
                             if (agendasDeleted.count > 0) {
-                                console.log(`[updateByCuitCuil] ⚠️ Agendas eliminadas por modificación de lugares: ${agendasDeleted.count}`);
                             }
                         }
 
@@ -258,7 +244,6 @@ class ProviderRepository {
                     }
                 }
 
-                console.log(`[updateByCuitCuil] Obteniendo prestador actualizado`);
                 const updated = await tx.prestador.findUnique({
                     where: { cuitCuil },
                     include: {
@@ -268,12 +253,9 @@ class ProviderRepository {
                         especialidades: { include: { especialidad: true } }
                     }
                 });
-                console.log(`[updateByCuitCuil] ✅ Transacción completada exitosamente`);
                 return mapper.map(updated);
             });
         } catch (error) {
-            console.error(`[ProviderRepository.updateByCuitCuil] ❌ Error:`, error.message);
-            console.error(`Stack:`, error.stack);
             throw new Error(`No se pudo actualizar el prestador: ${error.message}`);
         }
     }
@@ -313,7 +295,6 @@ class ProviderRepository {
                 return { message: `Prestador ${cuitCuil} eliminado correctamente` };
             });
         } catch (error) {
-            console.error('Error in ProviderRepository.deleteByCuitCuil:', error);
             throw new Error('No se pudo eliminar el prestador: ' + error.message);
         }
     }
@@ -345,7 +326,6 @@ class ProviderRepository {
 
             return agendas;
         } catch (error) {
-            console.error('Error in ProviderRepository.checkAgendasBySpecialty:', error);
             throw new Error('No se pudo verificar las agendas asociadas');
         }
     }
@@ -375,7 +355,6 @@ class ProviderRepository {
 
             return agendas;
         } catch (error) {
-            console.error('Error in ProviderRepository.checkAgendasByPlaces:', error);
             throw new Error('No se pudo verificar las agendas asociadas a los lugares');
         }
     }
@@ -393,7 +372,6 @@ class ProviderRepository {
             });
             return mapper.map(p);
         } catch (error) {
-            console.error('Error in ProviderRepository.findByCuitCuil:', error);
             throw new Error('No se pudo obtener el prestador');
         }
     }

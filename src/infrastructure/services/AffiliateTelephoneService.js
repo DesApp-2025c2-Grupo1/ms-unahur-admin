@@ -8,8 +8,6 @@ class AffiliateTelephoneService {
         await this.repo.delete(dnis);
     }
     async deleteTelephone(dni, telephone) {
-        console.log(dni)
-        console.log(telephone)
         await this.repo.deleteTelephone(dni, telephone);
     }
 }

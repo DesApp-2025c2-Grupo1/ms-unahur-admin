@@ -28,7 +28,6 @@ class AffiliateService {
 
     async getAffiliateByDni(dni) {
         const affiliate = await this.repo.getAffiliateByDni(dni);
-        console.log(affiliate);
         return affiliate;
     }
 
@@ -56,15 +55,7 @@ class AffiliateService {
 
     // Modificar afiliado
     async updateAffiliate(dni, data) {
-        console.log("🔧 Service - Datos que llegan:", {
-            dni,
-            situaciones: data.situaciones,
-            situacionesEliminadas: data.situacionesEliminadas
-        });
-
         const updated = await this.repo.update(dni, data);
-
-        console.log("Service - Actualización completada");
         return updated;
     }
 
@@ -76,8 +67,7 @@ class AffiliateService {
         const situations = this.getSituations(holderData.situaciones);
         const telephones = this.getTelephones(holderData.telefonos);
 
-        const count = await this.repo.getCount();
-        const nextFamilyNumber = count + 1;
+        const nextFamilyNumber = await this.repo.getNextCredentialNumber();
         const baseCredencial = `${nextFamilyNumber.toString().padStart(7, '0')}-01`;
 
         return await this.repo.create(holderData, baseCredencial, emails, telephones, situations, holderData.plan, null, holderData.fecha_alta);
@@ -125,18 +115,6 @@ class AffiliateService {
             throw new Error(`El afiliado con DNI ${dni} no pertenece a ningún grupo familiar`);
         }
 
-        if (affiliate.parentesco === 'Titular') {
-            throw new Error('No se puede eliminar al titular del grupo familiar. Debe eliminar todo el grupo.');
-        }
-
-        console.log('🗑️ Eliminando miembro del grupo familiar:', {
-            dni: affiliate.dni,
-            nombre: affiliate.nombre,
-            apellido: affiliate.apellido,
-            parentesco: affiliate.parentesco,
-            grupoFamiliar: affiliate.idGrupoFamiliarFK
-        });
-
         await this.deleteAffiliateAndRelatedData([dni]);
 
         return { message: `Afiliado ${affiliate.nombre} ${affiliate.apellido} eliminado correctamente` };
@@ -145,7 +123,6 @@ class AffiliateService {
     async getFamilyGroup(dni) {
         const familyGroup = await this.repo.getFamilyGroupNumber(dni);
         const familyMembers = await this.repo.getFamily(familyGroup.idGrupoFamiliarFK);
-        console.log(familyMembers)
         return familyMembers;
     }
 
@@ -183,14 +160,6 @@ class AffiliateService {
         const situations = this.getSituations(familyData.situaciones);
         const telephones = this.getTelephones(familyData.telefonos);
 
-        console.log('Creando familiar independiente:', {
-            dni: familyData.dni,
-            nombre: familyData.nombre,
-            apellido: familyData.apellido,
-            parentesco: familyData.parentesco,
-            credencial: credencialFamiliar,
-            familyGroupId: familyGroupId
-        });
 
         // Crear el familiar
         return await this.repo.create(

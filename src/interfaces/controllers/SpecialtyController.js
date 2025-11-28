@@ -8,7 +8,6 @@ class SpecialtyController {
             const items = await service.findAll();
             return res.json(items);
         } catch (error) {
-            console.error('SpecialtyController.findAll error:', error);
             return res.status(500).json({ error: 'Error al obtener las especialidades' });
         }
     }
@@ -20,7 +19,6 @@ class SpecialtyController {
             if (!item) return res.status(404).json({ error: 'Especialidad no encontrada' });
             return res.json(item);
         } catch (error) {
-            console.error('SpecialtyController.findById error:', error);
             return res.status(500).json({ error: 'Error al obtener la especialidad' });
         }
     }

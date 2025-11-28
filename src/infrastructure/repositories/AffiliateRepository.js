@@ -12,6 +12,7 @@ class AffiliateRepository2 {
             },
             include: {
                 situaciones: {
+                    where: { esta_activo: true },
                     include: {
                         situacionTerapeutica: true,
                     },
@@ -35,6 +36,7 @@ class AffiliateRepository2 {
             },
             include: {
                 situaciones: {
+                    where: { esta_activo: true },
                     include: {
                         situacionTerapeutica: true,
                     },
@@ -57,6 +59,7 @@ class AffiliateRepository2 {
             },
             include: {
                 situaciones: {
+                    where: { esta_activo: true },
                     include: {
                         situacionTerapeutica: true,
                     },
@@ -87,10 +90,12 @@ class AffiliateRepository2 {
     async getFamily(groupId) {
         return prisma.afiliado.findMany({
             where: {
-                idGrupoFamiliarFK: groupId
+                idGrupoFamiliarFK: groupId,
+                fecha_alta: { not: null }  // Excluir afiliados dados de baja
             },
             include: {
                 situaciones: {
+                    where: { esta_activo: true },
                     include: {
                         situacionTerapeutica: true,
                     },
@@ -180,80 +185,6 @@ class AffiliateRepository2 {
     };
 
 
-    /*async create(affiliate, credential, emails, telephones, situations, plan, familyGroupId = null, fechaAlta = null) {
-        if (fechaAlta) {
-            return prisma.afiliado.create({
-                data: {
-                    dni: affiliate.dni,
-                    nombre: affiliate.nombre,
-                    apellido: affiliate.apellido,
-                    credencial: `${credential}`,
-                    parentesco: affiliate.parentesco || TITULAR,
-                    direccion: affiliate.direccion || 'N/A',
-                    es_programada: true,
-                    fecha_alta: this.parseDate(fechaAlta),
-                    tipoDocumento: 'DNI',
-                    esta_activo: false,
-                    fecha_nacimiento: this.parseDate(affiliate.fecha_nacimiento),
-                    grupoFamiliar: familyGroupId
-                        ? { connect: { idGrupoFamiliar: familyGroupId } }
-                        : { create: { idPlanFK: plan, nroAfiliado: credential } },
-                    emails: emails?.length ? { create: emails.map(e => ({ email: e })) } : undefined,
-                    telefonos: telephones?.length ? { create: telephones.map(t => ({ telefono: t })) } : undefined,
-                    situaciones: situations?.length
-                        ? {
-                            create: situations.map(s => ({
-                                idSituacionFK: s.id,
-                                fechaInicio: this.parseDate(s.fecha_inicio),
-                                fechaFin: s.fecha_fin ? this.parseDate(s.fecha_fin) : null
-                            }))
-                        }
-                        : undefined
-                },
-                include: {
-                    grupoFamiliar: true,
-                    emails: true,
-                    telefonos: true,
-                    situaciones: true
-                }
-            })
-        }
-        return prisma.afiliado.create({
-            data: {
-                dni: affiliate.dni,
-                nombre: affiliate.nombre,
-                apellido: affiliate.apellido,
-                credencial: `${credential}`,
-                parentesco: affiliate.parentesco || TITULAR,
-                direccion: affiliate.direccion || 'N/A',
-                tipoDocumento: 'DNI',
-                emails: emails?.length ? { create: emails.map(e => ({ email: e })) } : undefined,
-                telefonos: telephones?.length ? { create: telephones.map(t => ({ telefono: t })) } : undefined,
-                fecha_nacimiento: this.parseDate(affiliate.fecha_nacimiento),
-                grupoFamiliar: familyGroupId
-                    ? { connect: { idGrupoFamiliar: familyGroupId } }
-                    : { create: { idPlanFK: plan, nroAfiliado: credential } },
-                emails: emails?.length ? { create: emails.map(e => ({ email: e })) } : undefined,
-                telefonos: telephones?.length ? { create: telephones.map(t => ({ telefono: t })) } : undefined,
-                situaciones: situations?.length
-                    ? {
-                        create: situations.map(s => ({
-                            idSituacionFK: s.id,
-                            fechaInicio: this.parseDate(s.fecha_inicio),
-                            fechaFin: s.fecha_fin ? this.parseDate(s.fecha_fin) : null
-                        }))
-                    }
-                    : undefined
-            },
-            include: {
-                grupoFamiliar: true,
-                emails: true,
-                telefonos: true,
-                situaciones: true
-            }
-        });
-    }*/
-
     async create(affiliate, credential, emails, telephones, situations, plan, familyGroupId = null, fechaAlta = null) {
         /**
          * Lógica:
@@ -266,16 +197,6 @@ class AffiliateRepository2 {
         // Si es alta inmediata, usar NOW() de la BD
         // Si es alta programada, usar la fecha que viene
         let fechaAltaFinal = fechaAlta ? this.parseDate(fechaAlta) : new Date();
-
-        console.log(`📝 Creando afiliado:`, {
-            dni: affiliate.dni,
-            nombre: affiliate.nombre,
-            credencial: credential,
-            esAltaInmediata,
-            fechaAlta: fechaAlta,
-            fechaAltaFinal,
-            esta_activo: esAltaInmediata
-        });
 
         return prisma.afiliado.create({
             data: {
@@ -388,10 +309,6 @@ class AffiliateRepository2 {
             situacionesEliminadas = []
         } = data;
 
-        console.log("Repository - Iniciando update");
-        console.log("Repository - Situaciones a eliminar:", situacionesEliminadas);
-        console.log("Repository - Situaciones a actualizar:", situaciones);
-
         // Obtener afiliado actual con TODAS las situaciones (sin filtrar por esta_activo)
         const currentAffiliate = await prisma.afiliado.findUnique({
             where: { dni },
@@ -411,7 +328,6 @@ class AffiliateRepository2 {
 
         // IMPORTANTE: ELIMINAR PRIMERO
         if (situacionesEliminadas.length > 0) {
-            console.log("Eliminando situaciones:", situacionesEliminadas);
             await prisma.situacionAfiliado.updateMany({
                 where: {
                     idSituacionAfiliado: { in: situacionesEliminadas },
@@ -489,7 +405,6 @@ class AffiliateRepository2 {
             }
         });
 
-        console.log("Repository - Update finalizado");
         return finalAffiliate;
     }
 
@@ -549,16 +464,11 @@ class AffiliateRepository2 {
     async updateSituations(dni, currentSituations, newSituations) {
         const currentMap = new Map(currentSituations.map(s => [s.idSituacionAfiliado, s]));
 
-        console.log("updateSituations - Situaciones actuales en BD:", Array.from(currentMap.keys()));
-        console.log("updateSituations - Nuevas situaciones recibidas:", newSituations);
 
         for (const sit of newSituations) {
-            console.log("Procesando situación:", sit);
 
             if (sit.idSituacionAfiliado && currentMap.has(sit.idSituacionAfiliado)) {
                 // Actualizar existente
-                console.log(`Actualizando situación existente ID: ${sit.idSituacionAfiliado}`);
-
                 await prisma.situacionAfiliado.update({
                     where: { idSituacionAfiliado: sit.idSituacionAfiliado },
                     data: {
@@ -569,7 +479,6 @@ class AffiliateRepository2 {
                 });
             } else if (!sit.idSituacionAfiliado && sit.idSituacion) {
                 // Crear nueva situación
-                console.log(`Creando nueva situación con idSituacion: ${sit.idSituacion}`);
 
                 await prisma.situacionAfiliado.create({
                     data: {
@@ -583,15 +492,23 @@ class AffiliateRepository2 {
             }
         }
 
-        console.log(" updateSituations - Situaciones procesadas correctamente");
     }
 
-    async getCount() {
-        return prisma.afiliado.count({
-            where: {
-                parentesco: TITULAR
-            }
+    async getNextCredentialNumber() {
+        // Get the affiliate with the highest credential number
+        const maxAffiliate = await prisma.afiliado.findFirst({
+            where: { parentesco: TITULAR },
+            orderBy: { credencial: 'desc' },
+            select: { credencial: true }
         });
+
+        if (!maxAffiliate || !maxAffiliate.credencial) {
+            return 1; // First affiliate
+        }
+
+        // Extract the base number from format XXXXXXX-XX
+        const baseNumber = parseInt(maxAffiliate.credencial.split('-')[0], 10);
+        return baseNumber + 1;
     }
 
     async updateAffiliatesPendingRegistration(dnis) {
@@ -611,7 +528,10 @@ class AffiliateRepository2 {
         return prisma.afiliado.count({
             where: {
                 idGrupoFamiliarFK: groupId,
-                fecha_alta: { lte: new Date() }
+                fecha_alta: {
+                    lte: new Date(),
+                    not: null  // Excluir afiliados dados de baja
+                }
             }
         });
     }

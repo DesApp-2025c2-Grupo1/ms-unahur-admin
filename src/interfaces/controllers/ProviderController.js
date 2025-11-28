@@ -13,7 +13,6 @@ class ProviderController {
             const providers = await this.service.findAll();
             return res.status(200).json(providers);
         } catch (error) {
-            console.error('ProviderController.findAll error:', error);
             return res.status(500).json({ error: error.message });
         }
     }
@@ -25,7 +24,6 @@ class ProviderController {
             if (!provider) return res.status(404).json({ message: 'Prestador no encontrado' });
             return res.status(200).json(provider);
         } catch (error) {
-            console.error('ProviderController.findByCuitCuil error:', error);
             return res.status(500).json({ error: error.message });
         }
     }
@@ -36,7 +34,6 @@ class ProviderController {
             const created = await this.service.create(payload);
             return res.status(201).json(created);
         } catch (error) {
-            console.error('ProviderController.create error:', error);
             return res.status(400).json({ error: error.message });
         }
     }
@@ -45,12 +42,9 @@ class ProviderController {
         try {
             const { cuit } = req.params;
             const payload = req.body;
-            console.log(`[ProviderController.update] Actualizando prestador ${cuit}:`, JSON.stringify(payload, null, 2));
             const updated = await this.service.update(cuit, payload);
-            console.log(`[ProviderController.update] ✅ Prestador actualizado:`, updated);
             return res.status(200).json(updated);
         } catch (error) {
-            console.error(`[ProviderController.update] ❌ Error:`, error.message, error);
             return res.status(400).json({ error: error.message });
         }
     }
@@ -69,7 +63,6 @@ class ProviderController {
             const agendas = await this.service.checkAgendasBySpecialty(cuit, specialtyId);
             return res.status(200).json({ agendas, count: agendas.length });
         } catch (error) {
-            console.error('ProviderController.checkAgendasBySpecialty error:', error);
             return res.status(500).json({ error: error.message });
         }
     }
@@ -81,7 +74,6 @@ class ProviderController {
             const agendas = await this.service.checkAgendasByPlaces(cuit);
             return res.status(200).json({ agendas, count: agendas.length });
         } catch (error) {
-            console.error('ProviderController.checkAgendasByPlaces error:', error);
             return res.status(500).json({ error: error.message });
         }
     }
@@ -94,7 +86,6 @@ class ProviderController {
             const result = await this.service.delete(cuit);
             return res.status(200).json(result);
         } catch (error) {
-            console.error('ProviderController.delete error:', error);
             return res.status(400).json({ error: error.message });
         }
     }

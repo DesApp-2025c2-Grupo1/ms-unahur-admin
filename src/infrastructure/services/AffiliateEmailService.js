@@ -8,8 +8,6 @@ class AffiliateEmailService {
         await this.repo.delete(dnis);
     }
     async deleteEmail(dni, email) {
-        console.log(dni)
-        console.log(email)
         await this.repo.deleteEmail(dni, email);
     }
 }

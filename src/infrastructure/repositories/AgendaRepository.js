@@ -8,11 +8,11 @@ class AgendaRepository {
     async findAll(filters = {}) {
         try {
             const where = { esta_activo: true };
-            
+
             if (filters.cuitCuil) {
                 where.cuitCuilFK = filters.cuitCuil;
             }
-            
+
             if (filters.idEspecialidad) {
                 where.idEspecialidadFK = parseInt(filters.idEspecialidad);
             }
@@ -57,7 +57,6 @@ class AgendaRepository {
 
             return agendas.map(a => mapper.map(a));
         } catch (error) {
-            console.error('Error in AgendaRepository.findAll:', error);
             throw new Error('No se pudieron obtener las agendas');
         }
     }
@@ -101,7 +100,6 @@ class AgendaRepository {
             if (!agenda) return null;
             return mapper.map(agenda);
         } catch (error) {
-            console.error('Error in AgendaRepository.findById:', error);
             throw new Error('No se pudo obtener la agenda');
         }
     }
@@ -125,10 +123,10 @@ class AgendaRepository {
                 // Crear los bloques horarios
                 if (Array.isArray(payload.bloques) && payload.bloques.length > 0) {
                     const bloquesData = [];
-                    
+
                     for (const bloque of payload.bloques) {
                         const dias = Array.isArray(bloque.dias) ? bloque.dias : [];
-                        
+
                         for (const dia of dias) {
                             bloquesData.push({
                                 idAgendaFK: agenda.idAgenda,
@@ -179,7 +177,6 @@ class AgendaRepository {
                 return mapper.map(created);
             });
         } catch (error) {
-            console.error('Error in AgendaRepository.create:', error);
             throw new Error(`No se pudo crear la agenda: ${error.message}`);
         }
     }
@@ -227,10 +224,10 @@ class AgendaRepository {
                     // Crear nuevos bloques
                     if (Array.isArray(payload.bloques) && payload.bloques.length > 0) {
                         const bloquesData = [];
-                        
+
                         for (const bloque of payload.bloques) {
                             const dias = Array.isArray(bloque.dias) ? bloque.dias : [];
-                            
+
                             for (const dia of dias) {
                                 bloquesData.push({
                                     idAgendaFK: parseInt(id),
@@ -282,7 +279,6 @@ class AgendaRepository {
                 return mapper.map(updated);
             });
         } catch (error) {
-            console.error('Error in AgendaRepository.update:', error);
             throw new Error(`No se pudo actualizar la agenda: ${error.message}`);
         }
     }
@@ -307,7 +303,6 @@ class AgendaRepository {
                 return { message: `Agenda ${id} eliminada correctamente` };
             });
         } catch (error) {
-            console.error('Error in AgendaRepository.delete:', error);
             throw new Error(`No se pudo eliminar la agenda: ${error.message}`);
         }
     }
