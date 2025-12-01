@@ -16,7 +16,13 @@ class AffiliateSituationRepository {
     //     });
     // }
     async delete(dnis) {
-        await prisma.situacionAfiliado.deleteMany()
+        await prisma.situacionAfiliado.deleteMany({
+            where: {
+                dniFK: {
+                    in: dnis
+                }
+            }
+        });
     }
 }
 
