@@ -20,6 +20,19 @@ const validateNoDuplicateSpecialties = (req, res, next) => {
 };
 
 const validateProviderCreate = [
+    // Require at least one contact method (telefono or mail)
+    body().custom((_, { req }) => {
+        const telefonos = req.body.telefonos;
+        const mails = req.body.mails;
+
+        const hasPhones = Array.isArray(telefonos) && telefonos.length > 0;
+        const hasMails = Array.isArray(mails) && mails.length > 0;
+
+        if (!hasPhones && !hasMails) {
+            throw new Error('Se requiere al menos un teléfono o un email');
+        }
+        return true;
+    }),
     body('cuitCuil')
         .notEmpty().withMessage('El CUIT/CUIL es obligatorio')
         .isString().withMessage('El CUIT/CUIL debe ser texto')
@@ -57,7 +70,11 @@ const validateProviderCreate = [
     body('telefonos.*')
         .optional()
         .isString().withMessage('teléfono debe ser texto')
-        .isLength({ min: 3, max: 20 }).withMessage('teléfono debe tener entre 3 y 20 caracteres'),
+        .custom((value) => {
+            const digits = (String(value).match(/\d/g) || []).length;
+            if (digits < 10) throw new Error('El teléfono debe contener al menos 10 dígitos numéricos');
+            return true;
+        }),
 
     body('mails')
         .optional()
@@ -111,7 +128,11 @@ const validateProviderUpdate = [
     body('nombreCompleto').optional().isString(),
     body('tipoPrestador').optional().isIn(['profesional', 'centro_medico']),
     body('telefonos').optional().isArray(),
-    body('telefonos.*').optional().isString(),
+    body('telefonos.*').optional().isString().withMessage('teléfono debe ser texto').custom((value) => {
+        const digits = (String(value).match(/\d/g) || []).length;
+        if (digits < 10) throw new Error('El teléfono debe contener al menos 10 dígitos numéricos');
+        return true;
+    }),
     body('mails').optional().isArray(),
     body('mails.*').optional().isEmail(),
     body('especialidades').optional().isArray(),

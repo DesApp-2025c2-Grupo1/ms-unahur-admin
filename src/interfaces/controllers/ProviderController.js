@@ -32,7 +32,7 @@ class ProviderController {
         try {
             const payload = req.body;
             const created = await this.service.create(payload);
-            return res.status(201).json(created);
+            return res.status(201).json({ message: 'Prestador creado correctamente', data: created });
         } catch (error) {
             return res.status(400).json({ error: error.message });
         }
@@ -43,7 +43,7 @@ class ProviderController {
             const { cuit } = req.params;
             const payload = req.body;
             const updated = await this.service.update(cuit, payload);
-            return res.status(200).json(updated);
+            return res.status(200).json({ message: 'Prestador actualizado correctamente', data: updated });
         } catch (error) {
             return res.status(400).json({ error: error.message });
         }
