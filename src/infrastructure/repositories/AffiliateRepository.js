@@ -24,6 +24,9 @@ class AffiliateRepository2 {
                 telefonos: {
                     where: { esta_activo: true }
                 }
+            },
+            orderBy: {
+                credencial: 'asc'
             }
         });
     }
@@ -48,6 +51,9 @@ class AffiliateRepository2 {
                 telefonos: {
                     where: { esta_activo: true }
                 }
+            },
+            orderBy: {
+                credencial: 'asc'
             }
         });
     }
@@ -108,6 +114,9 @@ class AffiliateRepository2 {
                 telefonos: {
                 },
             },
+            orderBy: {
+                credencial: 'asc'
+            }
         });
     }
 
